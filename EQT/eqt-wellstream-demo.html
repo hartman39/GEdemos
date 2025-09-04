@@ -329,11 +329,10 @@
         }
         
         .map-controls {
-            position: absolute;
-            top: 15px;
-            right: 15px;
             display: flex;
             gap: 0.5rem;
+            position: relative;
+            z-index: 5;
         }
         
         .map-control-btn {
@@ -376,10 +375,6 @@
             opacity: 1;
         }
         
-        .map-controls {
-            display: flex;
-            gap: 0.5rem;
-        }
         
         .map-stats {
             font-size: 0.9rem;
@@ -1494,16 +1489,7 @@
                 }
             });
             
-            // Add map controls
-            const controls = document.createElement('div');
-            controls.className = 'map-controls';
-            controls.innerHTML = `
-                <button class="map-control-btn active" onclick="filterWells('all')">All</button>
-                <button class="map-control-btn" onclick="filterWells('critical')">Critical</button>
-                <button class="map-control-btn" onclick="filterWells('warning')">Alerts</button>
-                <button class="map-control-btn" onclick="filterWells('optimal')">Optimal</button>
-            `;
-            map.appendChild(controls);
+            // Map controls are handled in the HTML template, not dynamically added
             
             // Add enhanced legend with geographic context
             const legend = document.createElement('div');
