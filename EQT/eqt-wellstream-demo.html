@@ -618,7 +618,30 @@
             display: none !important;
         }
         
-        /* Responsive Design */
+        /* Mobile-First Responsive Design */
+        
+        /* Large tablets and small desktops */
+        @media (max-width: 1024px) {
+            .header {
+                padding: 1rem 1.5rem;
+            }
+            
+            .logo-section {
+                gap: 0.8rem;
+            }
+            
+            .eqt-logo {
+                width: 50px;
+                height: 50px;
+                font-size: 1rem;
+            }
+            
+            .system-status {
+                font-size: 0.9rem;
+            }
+        }
+        
+        /* Tablets */
         @media (max-width: 900px) {
             #operations-dashboard {
                 grid-template-columns: 1fr;
@@ -629,40 +652,241 @@
                 position: static;
                 max-height: none;
                 height: auto;
+                min-height: auto;
             }
             
             .kpi-grid {
-                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1rem;
+            }
+            
+            .wells-map {
+                height: 400px;
+            }
+            
+            .map-legend {
+                position: static;
+                margin-top: 1rem;
+                width: 100%;
+                min-width: auto;
             }
         }
         
-        @media (min-width: 1400px) {
-            #operations-dashboard {
-                grid-template-columns: 2.5fr minmax(350px, 1fr);
-            }
-        }
-        
+        /* Mobile landscape and small tablets */
         @media (max-width: 768px) {
+            .header {
+                padding: 0.8rem 1rem;
+                flex-direction: column;
+                gap: 0.8rem;
+                text-align: center;
+            }
+            
+            .header .logo-section {
+                justify-content: center;
+            }
+            
+            .header .system-status {
+                text-align: center;
+            }
+            
             .main-dashboard {
                 padding: 1rem;
             }
             
             .tab-navigation {
                 padding: 0 1rem;
+                overflow-x: auto;
+                white-space: nowrap;
             }
             
             .tab-button {
-                padding: 0.8rem 1rem;
+                padding: 0.8rem 1.2rem;
                 font-size: 0.9rem;
+                white-space: nowrap;
             }
             
             .kpi-grid {
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
                 gap: 0.8rem;
             }
             
+            .kpi-card {
+                padding: 1rem;
+            }
+            
+            .kpi-value {
+                font-size: 1.5rem;
+            }
+            
             .fleet-overview, .alerts-panel {
-                padding: 1.5rem;
+                padding: 1.2rem;
+            }
+            
+            .wells-map {
+                height: 300px;
+            }
+            
+            .map-controls {
+                flex-wrap: wrap;
+                gap: 0.3rem;
+            }
+            
+            .map-control-btn {
+                font-size: 0.7rem;
+                padding: 0.4rem 0.6rem;
+            }
+            
+            .production-chart {
+                height: 150px;
+            }
+            
+            .alert-item {
+                padding: 0.8rem;
+                margin-bottom: 0.8rem;
+            }
+            
+            .well-details {
+                min-width: 90vw;
+                max-width: 90vw;
+                margin: 1rem;
+                max-height: 80vh;
+                overflow-y: auto;
+            }
+        }
+        
+        /* Mobile portrait */
+        @media (max-width: 480px) {
+            .header {
+                padding: 0.8rem;
+            }
+            
+            .logo-section div:nth-child(2) div:first-child {
+                font-size: 1.2rem;
+            }
+            
+            .logo-section div:nth-child(2) div:last-child {
+                font-size: 0.8rem;
+            }
+            
+            .main-dashboard {
+                padding: 0.8rem;
+            }
+            
+            .tab-button {
+                font-size: 0.8rem;
+                padding: 0.7rem 1rem;
+            }
+            
+            .kpi-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.6rem;
+            }
+            
+            .kpi-card {
+                padding: 0.8rem;
+            }
+            
+            .kpi-value {
+                font-size: 1.3rem;
+                margin-bottom: 0.3rem;
+            }
+            
+            .fleet-overview, .alerts-panel {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+            
+            .wells-map {
+                height: 250px;
+            }
+            
+            .map-legend {
+                font-size: 0.7rem;
+                padding: 0.8rem;
+            }
+            
+            .production-chart {
+                height: 120px;
+            }
+            
+            .alert-item {
+                padding: 0.7rem;
+                font-size: 0.9rem;
+            }
+            
+            .alert-severity {
+                font-size: 0.8rem;
+            }
+            
+            /* CEO Dashboard mobile optimizations */
+            #ceo-dashboard .kpi-grid {
+                grid-template-columns: 1fr;
+                gap: 0.8rem;
+            }
+            
+            #ceo-dashboard .kpi-card {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                text-align: left;
+            }
+            
+            #ceo-dashboard .kpi-value {
+                font-size: 1.5rem;
+                margin-bottom: 0;
+            }
+            
+            /* Strategic sections mobile layout */
+            div[style*="grid-template-columns: 1fr 1fr 1fr"] {
+                display: block !important;
+            }
+            
+            div[style*="grid-template-columns: 1fr 1fr 1fr"] > div {
+                margin-bottom: 1.5rem !important;
+            }
+            
+            div[style*="grid-template-columns: 1fr 1fr"] {
+                display: block !important;
+            }
+            
+            div[style*="grid-template-columns: 1fr 1fr"] > div {
+                margin-bottom: 1rem !important;
+            }
+            
+            div[style*="grid-template-columns: 1fr 1fr 1fr 1fr"] {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 0.8rem !important;
+            }
+        }
+        
+        /* Large desktops */
+        @media (min-width: 1400px) {
+            #operations-dashboard {
+                grid-template-columns: 2.5fr minmax(350px, 1fr);
+            }
+        }
+        
+        /* Touch-friendly improvements for all mobile devices */
+        @media (max-width: 768px) {
+            .well-dot {
+                width: 16px;
+                height: 16px;
+                cursor: pointer;
+            }
+            
+            .well-dot:hover {
+                transform: scale(2);
+            }
+            
+            .control-button, .map-control-btn, .tab-button {
+                min-height: 44px;
+                touch-action: manipulation;
+            }
+            
+            /* Improve scrolling on mobile */
+            .alerts-panel {
+                -webkit-overflow-scrolling: touch;
             }
         }
     </style>
@@ -1607,10 +1831,133 @@
             });
         }
 
+        // Mobile optimization functions
+        function initMobileOptimizations() {
+            // Detect mobile device
+            const isMobile = window.innerWidth <= 768;
+            
+            if (isMobile) {
+                // Add mobile-specific event listeners
+                document.body.classList.add('mobile-device');
+                
+                // Improve touch response for map interactions
+                const wellDots = document.querySelectorAll('.well-dot');
+                wellDots.forEach(dot => {
+                    // Add touch feedback
+                    dot.addEventListener('touchstart', function(e) {
+                        this.style.transform = 'scale(1.5)';
+                        this.style.zIndex = '1000';
+                    });
+                    
+                    dot.addEventListener('touchend', function(e) {
+                        setTimeout(() => {
+                            this.style.transform = '';
+                            this.style.zIndex = '';
+                        }, 200);
+                    });
+                });
+                
+                // Optimize tab switching for mobile
+                const tabButtons = document.querySelectorAll('.tab-button');
+                tabButtons.forEach(button => {
+                    button.addEventListener('touchstart', function() {
+                        this.style.background = 'rgba(5, 150, 105, 0.2)';
+                    });
+                    
+                    button.addEventListener('touchend', function() {
+                        setTimeout(() => {
+                            if (!this.classList.contains('active')) {
+                                this.style.background = '';
+                            }
+                        }, 150);
+                    });
+                });
+                
+                // Prevent zoom on double tap for buttons
+                const buttons = document.querySelectorAll('button, .control-button, .map-control-btn');
+                buttons.forEach(button => {
+                    button.addEventListener('touchend', function(e) {
+                        e.preventDefault();
+                    });
+                });
+                
+                // Add swipe gesture for tab switching
+                let touchStartX = null;
+                let touchStartY = null;
+                
+                document.addEventListener('touchstart', function(e) {
+                    touchStartX = e.touches[0].clientX;
+                    touchStartY = e.touches[0].clientY;
+                });
+                
+                document.addEventListener('touchmove', function(e) {
+                    if (!touchStartX || !touchStartY) return;
+                    
+                    const touchEndX = e.touches[0].clientX;
+                    const touchEndY = e.touches[0].clientY;
+                    
+                    const diffX = touchStartX - touchEndX;
+                    const diffY = touchStartY - touchEndY;
+                    
+                    // Only trigger if horizontal swipe is dominant
+                    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                        const activeTab = document.querySelector('.tab-button.active');
+                        if (activeTab) {
+                            const isOperationsActive = activeTab.textContent.includes('Operations');
+                            
+                            // Swipe left to go to CEO dashboard
+                            if (diffX > 0 && isOperationsActive) {
+                                switchTab('ceo');
+                                e.preventDefault();
+                            }
+                            // Swipe right to go to Operations dashboard  
+                            else if (diffX < 0 && !isOperationsActive) {
+                                switchTab('operations');
+                                e.preventDefault();
+                            }
+                        }
+                        
+                        touchStartX = null;
+                        touchStartY = null;
+                    }
+                });
+            }
+        }
+        
+        // Handle orientation changes
+        function handleOrientationChange() {
+            // Force re-render of charts and maps on orientation change
+            setTimeout(() => {
+                // Regenerate production chart with new dimensions
+                const chart = document.getElementById('production-chart');
+                if (chart) {
+                    chart.innerHTML = '';
+                    generateProductionChart();
+                }
+                
+                // Adjust map legend position
+                const legends = document.querySelectorAll('.map-legend');
+                legends.forEach(legend => {
+                    if (window.innerWidth <= 768) {
+                        legend.style.position = 'static';
+                        legend.style.marginTop = '1rem';
+                    } else {
+                        legend.style.position = 'absolute';
+                        legend.style.marginTop = '0';
+                    }
+                });
+            }, 300);
+        }
+        
+        // Add resize listener for responsive updates
+        window.addEventListener('resize', handleOrientationChange);
+        window.addEventListener('orientationchange', handleOrientationChange);
+        
         // Initialize
         generateWellMap();
         generateProductionChart();
         simulateRealTimeData();
+        initMobileOptimizations();
     </script>
 </body>
 </html>
