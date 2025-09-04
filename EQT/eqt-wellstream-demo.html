@@ -76,7 +76,7 @@
         
         #operations-dashboard {
             display: grid !important;
-            grid-template-columns: 2fr minmax(300px, 1fr) !important;
+            grid-template-columns: 2fr minmax(400px, 1.4fr) !important;
             gap: 2rem !important;
             align-items: start !important;
             width: 100% !important;
@@ -385,12 +385,11 @@
             border-radius: 12px;
             padding: 2rem;
             border-left: 4px solid #ef4444;
-            height: fit-content;
-            min-height: calc(100vh - 200px);
-            max-height: calc(100vh - 150px);
-            overflow-y: auto;
-            position: sticky;
-            top: 1rem;
+            height: auto;
+            min-height: fit-content;
+            max-height: none;
+            overflow-y: visible;
+            position: relative;
             min-width: 0;
         }
         
@@ -875,7 +874,7 @@
         /* Large desktops */
         @media (min-width: 1400px) {
             #operations-dashboard {
-                grid-template-columns: 2.5fr minmax(350px, 1fr);
+                grid-template-columns: 2.2fr minmax(450px, 1.6fr);
             }
         }
         
