@@ -613,99 +613,164 @@
     <!-- Monitoring Dashboard Tab -->
     <div id="monitoring-dashboard" class="main-dashboard">
         
-        <!-- Fleet Overview for Engine Monitoring -->
-        <div class="fleet-overview">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <div>
-                    <h3 style="color: #3b82f6; margin-bottom: 0.5rem;">🌐 Global Fleet Status</h3>
-                    <div style="font-size: 0.9rem; opacity: 0.8;">Real-time monitoring across 14,247 engines worldwide</div>
+        <!-- TIER 1: IMMEDIATE ACTION REQUIRED - Highest Impact -->
+        <div class="critical-alert-banner" style="background: linear-gradient(135deg, #dc2626, #ef4444); border: 2px solid #fecaca; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 8px 25px rgba(220, 38, 38, 0.3); position: relative; overflow: hidden;">
+            <div style="position: absolute; top: 0; right: 0; width: 100px; height: 100px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; transform: translate(30px, -30px);"></div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="flex: 1;">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                        <div style="animation: pulse 1s infinite; font-size: 1.5rem;">🚨</div>
+                        <h2 style="color: white; margin: 0; font-size: 1.4rem;">CRITICAL: Immediate Action Required</h2>
+                        <div style="background: rgba(255, 255, 255, 0.2); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; color: white;">Flight AA2847</div>
+                    </div>
+                    <div style="color: rgba(255, 255, 255, 0.9); font-size: 1.1rem; margin-bottom: 0.5rem;">
+                        <strong>Boeing 737 MAX • Engine #2 • 35,000ft</strong>
+                    </div>
+                    <div style="color: rgba(255, 255, 255, 0.8);">High-pressure turbine blade fatigue detected - 67 hours to mandatory maintenance</div>
                 </div>
-                <div style="text-align: right;">
-                    <div style="font-size: 0.9rem; color: #10b981;">● Live Data</div>
-                    <div style="font-size: 0.8rem; opacity: 0.7;">Updated every 30 seconds</div>
-                </div>
-            </div>
-            
-            <div class="fleet-metrics">
-                <div class="fleet-metric-card">
-                    <div style="font-size: 1.8rem; font-weight: bold; color: #3b82f6; margin-bottom: 0.5rem;">14,247</div>
-                    <div style="font-size: 0.9rem;">Aircraft Monitored</div>
-                    <div style="font-size: 0.8rem; color: #10b981; margin-top: 0.3rem;">+47 this week</div>
-                </div>
-                <div class="fleet-metric-card">
-                    <div style="font-size: 1.8rem; font-weight: bold; color: #10b981; margin-bottom: 0.5rem;">99.7%</div>
-                    <div style="font-size: 0.9rem;">Fleet Availability</div>
-                    <div style="font-size: 0.8rem; color: #10b981; margin-top: 0.3rem;">Above 99.5% target</div>
-                </div>
-                <div class="fleet-metric-card">
-                    <div style="font-size: 1.8rem; font-weight: bold; color: #f59e0b; margin-bottom: 0.5rem;">3</div>
-                    <div style="font-size: 0.9rem;">Active Alerts</div>
-                    <div style="font-size: 0.8rem; color: #ef4444; margin-top: 0.3rem;">1 critical, 2 advisory</div>
-                </div>
-                <div class="fleet-metric-card">
-                    <div style="font-size: 1.8rem; font-weight: bold; color: #10b981; margin-bottom: 0.5rem;">$47.8M</div>
-                    <div style="font-size: 0.9rem;">Costs Avoided</div>
-                    <div style="font-size: 0.8rem; color: #10b981; margin-top: 0.3rem;">This month</div>
+                <div style="text-align: right; color: white;">
+                    <div style="font-size: 2rem; font-weight: bold; margin-bottom: 0.25rem;">$2.3M</div>
+                    <div style="font-size: 0.9rem; opacity: 0.8;">Risk Value</div>
+                    <button onclick="drillDownToEngine('AA2847', 'critical')" style="background: rgba(255, 255, 255, 0.2); color: white; border: 1px solid rgba(255, 255, 255, 0.3); padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 0.5rem;">INVESTIGATE →</button>
                 </div>
             </div>
-            
-            <div style="margin-top: 1.5rem;">
-                <h4 style="color: #ef4444; margin-bottom: 0.8rem;">⚠️ Priority Alerts Requiring Action</h4>
-                <div class="fleet-alerts">
-                    <div class="fleet-alert-card" onclick="drillDownToEngine('AA2847', 'critical')">
+        </div>
+
+        <!-- TIER 2: OPERATIONAL STATUS - Fleet Overview -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+            <!-- Fleet Health Summary -->
+            <div style="background: #1a1f2e; border: 1px solid #374151; border-radius: 12px; padding: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="color: #3b82f6; margin: 0;">Fleet Health Overview</h3>
+                    <div style="color: #10b981; font-size: 0.9rem;">● Live Monitoring</div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem;">
+                    <div style="background: #0f172a; padding: 1rem; border-radius: 8px; text-align: center; border-left: 3px solid #3b82f6;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #3b82f6;">14,247</div>
+                        <div style="font-size: 0.9rem; color: #9ca3af;">Engines Active</div>
+                    </div>
+                    <div style="background: #0f172a; padding: 1rem; border-radius: 8px; text-align: center; border-left: 3px solid #10b981;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #10b981;">99.7%</div>
+                        <div style="font-size: 0.9rem; color: #9ca3af;">Availability</div>
+                    </div>
+                    <div style="background: #0f172a; padding: 1rem; border-radius: 8px; text-align: center; border-left: 3px solid #ef4444;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #ef4444;">1</div>
+                        <div style="font-size: 0.9rem; color: #9ca3af;">Critical Alerts</div>
+                    </div>
+                    <div style="background: #0f172a; padding: 1rem; border-radius: 8px; text-align: center; border-left: 3px solid #f59e0b;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #f59e0b;">2</div>
+                        <div style="font-size: 0.9rem; color: #9ca3af;">Advisory Alerts</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cost Impact -->
+            <div style="background: linear-gradient(135deg, #059669, #10b981); border-radius: 12px; padding: 1.5rem; color: white; text-align: center;">
+                <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.5rem;">Cost Impact Prevented</div>
+                <div style="font-size: 2.5rem; font-weight: bold; margin-bottom: 0.5rem;">$47.8M</div>
+                <div style="font-size: 0.9rem; opacity: 0.8;">This month through predictive maintenance</div>
+            </div>
+        </div>
+
+        <!-- TIER 3: ACTIVE MONITORING - Engine Focus -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+            <!-- Engine Visualization -->
+            <div style="background: #1a1f2e; border: 1px solid #374151; border-radius: 12px; padding: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="margin: 0; color: #f59e0b;">Engine #2 - CFM LEAP-1B</h3>
+                    <div style="display: flex; gap: 1rem; font-size: 0.9rem;">
+                        <div style="color: #ef4444; display: flex; align-items: center; gap: 0.25rem;">
+                            <div style="width: 8px; height: 8px; background: #ef4444; border-radius: 50%; animation: pulse 1s infinite;"></div>
+                            CRITICAL
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="engine-diagram" onclick="showEngineDetails()" style="position: relative; background: radial-gradient(circle, #2a3142, #1a1f2e); border-radius: 50%; width: 200px; height: 200px; margin: 0 auto 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; border: 2px solid #ef4444; box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);">
+                    <div style="text-align: center; color: white;">
+                        <div style="font-size: 1.2rem; font-weight: bold;">CFM LEAP-1B</div>
+                        <div style="font-size: 0.8rem; opacity: 0.8; margin-top: 0.25rem;">Click for details</div>
+                    </div>
+                    <!-- Critical indicator -->
+                    <div style="position: absolute; top: 10px; right: 10px; width: 12px; height: 12px; background: #ef4444; border-radius: 50%; animation: pulse 1s infinite;"></div>
+                </div>
+
+                <!-- Key Metrics -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div style="background: #dc2626; padding: 1rem; border-radius: 8px; text-align: center; color: white;">
+                        <div style="font-size: 1.3rem; font-weight: bold;">1,847°F</div>
+                        <div style="font-size: 0.9rem;">Turbine Temp</div>
+                        <div style="font-size: 0.8rem; opacity: 0.9;">⚠️ Above limit</div>
+                    </div>
+                    <div style="background: #0f172a; padding: 1rem; border-radius: 8px; text-align: center; border: 1px solid #374151;">
+                        <div style="font-size: 1.3rem; font-weight: bold; color: #10b981;">42.3</div>
+                        <div style="font-size: 0.9rem; color: #9ca3af;">Oil Pressure (PSI)</div>
+                        <div style="font-size: 0.8rem; color: #10b981;">✓ Normal</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advisory Alerts & Actions -->
+            <div style="background: #1a1f2e; border: 1px solid #374151; border-radius: 12px; padding: 1.5rem;">
+                <h3 style="margin: 0 0 1rem 0; color: #f59e0b;">Advisory Alerts</h3>
+                
+                <div style="space-y: 1rem;">
+                    <div class="fleet-alert-card advisory" onclick="drillDownToEngine('DL4532', 'advisory')" style="background: #0f172a; border-left: 3px solid #f59e0b; padding: 1rem; border-radius: 6px; cursor: pointer; margin-bottom: 1rem;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
-                                <div style="font-weight: bold; color: #ef4444; margin-bottom: 0.3rem;">🔴 CRITICAL - Flight AA2847</div>
-                                <div style="font-size: 0.9rem; margin-bottom: 0.3rem;">Boeing 737 MAX • Engine #2 • 35,000ft</div>
-                                <div style="font-size: 0.8rem; opacity: 0.9;">Turbine blade fatigue detected - 67hrs to maintenance</div>
+                                <div style="font-weight: bold; color: #f59e0b; margin-bottom: 0.25rem;">Flight DL4532</div>
+                                <div style="font-size: 0.9rem; color: #d1d5db;">Boeing 757 • Engine #1</div>
+                                <div style="font-size: 0.85rem; color: #9ca3af;">Oil filter efficiency declining</div>
                             </div>
                             <div style="text-align: right;">
-                                <div style="font-size: 1rem; font-weight: bold; color: #ef4444;">$2.3M</div>
-                                <div style="font-size: 0.8rem;">Risk Value</div>
+                                <div style="color: #f59e0b; font-weight: bold;">$450K</div>
+                                <div style="font-size: 0.8rem; color: #9ca3af;">Risk</div>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="fleet-alert-card advisory" onclick="drillDownToEngine('DL4532', 'advisory')">
+                    <div class="fleet-alert-card advisory" onclick="drillDownToEngine('UA8721', 'advisory')" style="background: #0f172a; border-left: 3px solid #f59e0b; padding: 1rem; border-radius: 6px; cursor: pointer;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
-                                <div style="font-weight: bold; color: #f59e0b; margin-bottom: 0.3rem;">🟡 ADVISORY - Flight DL4532</div>
-                                <div style="font-size: 0.9rem; margin-bottom: 0.3rem;">Boeing 757 • Engine #1 • 28,000ft</div>
-                                <div style="font-size: 0.8rem; opacity: 0.9;">Oil filter efficiency declining - schedule maintenance</div>
+                                <div style="font-weight: bold; color: #f59e0b; margin-bottom: 0.25rem;">Flight UA8721</div>
+                                <div style="font-size: 0.9rem; color: #d1d5db;">Boeing 777 • Engine #2</div>
+                                <div style="font-size: 0.85rem; color: #9ca3af;">Fuel nozzle performance low</div>
                             </div>
                             <div style="text-align: right;">
-                                <div style="font-size: 1rem; font-weight: bold; color: #f59e0b;">$450K</div>
-                                <div style="font-size: 0.8rem;">Prevention</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="fleet-alert-card advisory" onclick="drillDownToEngine('UA8721', 'advisory')">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <div style="font-weight: bold; color: #f59e0b; margin-bottom: 0.3rem;">🟡 ADVISORY - Flight UA8721</div>
-                                <div style="font-size: 0.9rem; margin-bottom: 0.3rem;">Boeing 777 • Engine #2 • Ground: JFK</div>
-                                <div style="font-size: 0.8rem; opacity: 0.9;">Fuel nozzle performance low - inspect before takeoff</div>
-                            </div>
-                            <div style="text-align: right;">
-                                <div style="font-size: 1rem; font-weight: bold; color: #f59e0b;">$180K</div>
-                                <div style="font-size: 0.8rem;">Prevention</div>
+                                <div style="color: #f59e0b; font-weight: bold;">$180K</div>
+                                <div style="font-size: 0.8rem; color: #9ca3af;">Risk</div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="engine-visual">
+
+        <!-- TIER 4: FLEET ANALYSIS - Matrix View -->
+        <div style="background: #1a1f2e; border: 1px solid #374151; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <h3>Engine #2 - Real-Time Visualization</h3>
-                <div style="display: flex; gap: 1rem; font-size: 0.9rem;">
-                    <div style="color: #ef4444;">🔴 2 Critical</div>
-                    <div style="color: #f59e0b;">🟡 1 Warning</div>
-                    <div style="color: #22c55e;">🟢 5 Normal</div>
+                <h3 style="margin: 0; color: #3b82f6;">Fleet Health Matrix</h3>
+                <button onclick="toggleFleetView()" style="background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Detailed View</button>
+            </div>
+            
+            <div style="text-align: center; color: #9ca3af; padding: 2rem;">
+                <div style="font-size: 1.1rem; margin-bottom: 0.5rem;">Sample: 500 Engines from Global Fleet</div>
+                <div style="display: inline-block; background: #0f172a; padding: 1rem; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 0.75rem;">
+                    <div id="engine-grid" style="display: grid; grid-template-columns: repeat(25, 1fr); gap: 2px; max-height: 200px; overflow-y: auto;">
+                        <!-- Grid will be populated by JavaScript -->
+                    </div>
+                    <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 1rem; font-size: 0.8rem;">
+                        <div style="display: flex; align-items: center; gap: 0.25rem;"><div style="width: 8px; height: 8px; background: #22c55e; border-radius: 2px;"></div> Optimal (94.2%)</div>
+                        <div style="display: flex; align-items: center; gap: 0.25rem;"><div style="width: 8px; height: 8px; background: #f59e0b; border-radius: 2px;"></div> Advisory (5.6%)</div>
+                        <div style="display: flex; align-items: center; gap: 0.25rem;"><div style="width: 8px; height: 8px; background: #ef4444; border-radius: 2px;"></div> Critical (0.2%)</div>
+                    </div>
                 </div>
             </div>
-            <div class="engine-diagram" onclick="showEngineDetails()">
+        </div>
+    </div>
+
+    <!-- Executive Intelligence Dashboard Tab -->
                 <div class="engine-core">
                     <div style="z-index: 10; text-align: center;">
                         <div style="font-size: 1.8rem;">CFM LEAP-1B</div>
