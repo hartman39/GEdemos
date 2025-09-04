@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code for GE Aerospace - Mission-Critical Software at Scale: 14,000+ Aircraft</title>
+    <style>
+        :root {
+            --primary-blue: #1e40af;
+            --secondary-blue: #3b82f6;
+            --accent-blue: #0ea5e9;
+            --warning-orange: #f59e0b;
+            --success-green: #10b981;
+            --error-red: #ef4444;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            --container-max-width: 1280px;
+            --border-radius-sm: 8px;
+            --border-radius-md: 12px;
+            --border-radius-lg: 16px;
+            --border-radius-xl: 24px;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --transition-fast: 0.15s ease-in-out;
+            --transition-normal: 0.3s ease-in-out;
+            --transition-slow: 0.5s ease-in-out;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: var(--gray-900);
+            font-weight: 400;
+            background: #ffffff;
+        }
+        
+        /* Typography Scale */
+        .text-xs { font-size: 0.75rem; }
+        .text-sm { font-size: 0.875rem; }
+        .text-base { font-size: 1rem; }
+        .text-lg { font-size: 1.125rem; }
+        .text-xl { font-size: 1.25rem; }
+        .text-2xl { font-size: 1.5rem; }
+        .text-3xl { font-size: 1.875rem; }
+        .text-4xl { font-size: 2.25rem; }
+        .text-5xl { font-size: 3rem; }
+        .text-6xl { font-size: 3.75rem; }
+        
+        /* Spacing utilities */
+        .mb-1 { margin-bottom: 0.25rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .mb-8 { margin-bottom: 2rem; }
+        .mb-12 { margin-bottom: 3rem; }
+        .mb-16 { margin-bottom: 4rem; }
+        
+        .mt-1 { margin-top: 0.25rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-3 { margin-top: 0.75rem; }
+        .mt-4 { margin-top: 1rem; }
+        .mt-6 { margin-top: 1.5rem; }
+        .mt-8 { margin-top: 2rem; }
+        .mt-12 { margin-top: 3rem; }
+        .mt-16 { margin-top: 4rem; }
+        
+        /* Badge Components */
+        .executive-badge {
+            background: linear-gradient(135deg, var(--warning-orange) 0%, #d97706 100%);
+            color: var(--gray-900);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.75px;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .executive-badge::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: var(--transition-slow);
+        }
+        
+        .executive-badge:hover::before {
+            left: 100%;
+        }
+        
+        .trust-badge {
+            background: rgba(59, 130, 246, 0.1);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            padding: 12px 20px;
+            border-radius: var(--border-radius-md);
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--primary-blue);
+            transition: var(--transition-normal);
+            cursor: default;
+        }
+        
+        .trust-badge:hover {
+            background: rgba(59, 130, 246, 0.15);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .value-prop-highlight {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(16px);
+            padding: 2.5rem;
+            border-radius: var(--border-radius-xl);
+            margin: 3rem auto;
+            max-width: 800px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+        
+        .value-prop-highlight::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        }
+        
+        .value-prop-content {
+            display: grid;
+            gap: 1.5rem;
+            text-align: center;
+        }
+        
+        .value-highlight-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .value-highlight-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            opacity: 0.9;
+            font-size: 0.875rem;
+        }
+        
+        .value-highlight-number {
+            font-weight: 700;
+            font-size: 1.125rem;
+            margin-bottom: 0.25rem;
+            color: rgba(255,255,255,0.95);
+        }
+        
+        .executive-summary {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 3rem;
+            margin: 3rem 0;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .aviation-banner {
+            background: linear-gradient(135deg, var(--secondary-blue) 0%, var(--primary-blue) 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .aviation-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .aviation-banner-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .banner-stat {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .banner-separator {
+            width: 1px;
+            height: 20px;
+            background: rgba(255,255,255,0.3);
+            margin: 0 0.5rem;
+        }
+        
+        .trust-indicators {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .trust-badge {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1e40af;
+        }
+        
+        .quote-section {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 2rem;
+            margin: 2rem 0;
+            font-style: italic;
+            font-size: 1.1rem;
+        }
+        
+        /* CTA Components */
+        .primary-cta {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+            color: white;
+            padding: 20px 48px;
+            border: none;
+            border-radius: var(--border-radius-md);
+            font-size: 1.125rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: var(--transition-normal);
+            box-shadow: var(--shadow-lg);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        
+        .primary-cta::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: var(--transition-slow);
+        }
+        
+        .primary-cta:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: var(--shadow-xl);
+            filter: brightness(1.05);
+        }
+        
+        .primary-cta:hover::before {
+            left: 100%;
+        }
+        
+        .primary-cta:active {
+            transform: translateY(-1px) scale(1.01);
+        }
+        
+        .secondary-cta {
+            background: transparent;
+            color: var(--secondary-blue);
+            border: 2px solid var(--secondary-blue);
+            padding: 18px 36px;
+            border-radius: var(--border-radius-md);
+            font-size: 1.125rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-left: 1rem;
+            transition: var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        
+        .secondary-cta::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: var(--secondary-blue);
+            transition: var(--transition-normal);
+            z-index: -1;
+        }
+        
+        .secondary-cta:hover {
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .secondary-cta:hover::before {
+            width: 100%;
+        }
+        
+        .cta-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            align-items: center;
+            margin-top: 3rem;
+            animation: fadeInUp 0.8s ease-out 0.6s both;
+        }
+        
+        @media (max-width: 640px) {
+            .cta-group {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .primary-cta,
+            .secondary-cta {
+                margin: 0;
+                width: 100%;
+                justify-content: center;
+            }
+        }
+        
+        .metric-highlight {
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.95);
+            display: block;
+            margin-bottom: 0.75rem;
+            line-height: 1;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            animation: countUp 1.5s ease-out 0.8s both;
+        }
+        
+        @keyframes countUp {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        /* Layout Components */
+        .container {
+            max-width: var(--container-max-width);
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        
+        .container-sm {
+            max-width: 768px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        
+        .section {
+            padding: 6rem 0;
+            position: relative;
+        }
+        
+        .section-alt {
+            background: linear-gradient(135deg, var(--gray-50) 0%, #ffffff 100%);
+            position: relative;
+        }
+        
+        .section-alt::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gray-200), transparent);
+        }
+        
+        /* Header & Hero */
+        header {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 50%, var(--accent-blue) 100%);
+            color: white;
+            padding: 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(255,255,255,0.1) 0%, transparent 50%);
+        }
+        
+        .hero {
+            position: relative;
+            z-index: 2;
+            padding: 4rem 0;
+        }
+        
+        .hero-scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255,255,255,0.7);
+            font-size: 0.875rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            animation: bounceDown 2s ease-in-out infinite;
+        }
+        
+        @keyframes bounceDown {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-10px); }
+            60% { transform: translateX(-50%) translateY(-5px); }
+        }
+        
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 1.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.025em;
+            background: linear-gradient(135deg, #ffffff 0%, #e0f2fe 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        .hero p {
+            font-size: clamp(1.125rem, 2vw, 1.375rem);
+            margin-bottom: 3rem;
+            opacity: 0.95;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.7;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .cta-button {
+            background: #f59e0b;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.3s;
+        }
+        
+        .cta-button:hover {
+            background: #d97706;
+        }
+        
+        /* Navigation */
+        .floating-nav {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            opacity: 0;
+            animation: fadeInRight 0.8s ease-out 1s both;
+        }
+        
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            border: 2px solid rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: var(--transition-normal);
+            position: relative;
+        }
+        
+        .nav-dot.active,
+        .nav-dot:hover {
+            background: white;
+            border-color: white;
+            box-shadow: 0 0 0 4px rgba(255,255,255,0.2);
+        }
+        
+        .nav-dot::after {
+            content: attr(data-label);
+            position: absolute;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: var(--border-radius-sm);
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition-fast);
+        }
+        
+        .nav-dot:hover::after {
+            opacity: 1;
+        }
+        
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .section h2 {
+            font-size: clamp(1.875rem, 4vw, 2.75rem);
+            text-align: center;
+            margin-bottom: 4rem;
+            color: var(--primary-blue);
+            font-weight: 800;
+            line-height: 1.2;
+            letter-spacing: -0.025em;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+        
+        .section h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--secondary-blue), var(--accent-blue));
+            border-radius: 2px;
+        }
+        
+        .section-subtitle {
+            text-align: center;
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            color: var(--gray-600);
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            line-height: 1.6;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+        
+        @media (min-width: 1024px) {
+            .features-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--gray-200);
+            transition: var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--secondary-blue), var(--accent-blue));
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--secondary-blue);
+        }
+        
+        .feature-card:nth-child(2):hover {
+            border-color: var(--accent-blue);
+        }
+        
+        .feature-card:nth-child(3):hover {
+            border-color: var(--success-green);
+        }
+        
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--secondary-blue), var(--accent-blue));
+            border-radius: var(--border-radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .feature-card h3 {
+            font-size: 1.375rem;
+            margin-bottom: 1rem;
+            color: var(--primary-blue);
+            font-weight: 700;
+            line-height: 1.3;
+        }
+        
+        .feature-card p {
+            color: var(--gray-600);
+            margin-bottom: 1.5rem;
+            line-height: 1.7;
+            flex-grow: 1;
+        }
+        
+        .feature-card .learn-more {
+            color: var(--secondary-blue);
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: auto;
+            transition: var(--transition-normal);
+        }
+        
+        .feature-card .learn-more:hover {
+            color: var(--primary-blue);
+            transform: translateX(4px);
+        }
+        
+        .roi-highlight {
+            background: linear-gradient(135deg, var(--success-green), #059669);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 24px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+            font-size: 0.875rem;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition-normal);
+        }
+        
+        .roi-highlight:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .roi-highlight::before {
+            content: '💰';
+            font-size: 1rem;
+        }
+        
+        .video-section {
+            text-align: center;
+            padding: 3rem 0;
+            background: #1e40af;
+            color: white;
+        }
+        
+        .video-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: #1d4ed8;
+            padding: 2rem;
+            border-radius: 12px;
+        }
+        
+        .use-cases {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+        
+        .use-case {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #0ea5e9;
+        }
+        
+        .use-case h3 {
+            color: #1e40af;
+            margin-bottom: 1rem;
+        }
+        
+        .use-case .roi-metric {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-weight: 600;
+        }
+        
+        .impact-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #3b82f6;
+            display: block;
+        }
+        
+        .stat-label {
+            color: #374151;
+            margin-top: 0.5rem;
+        }
+        
+        .aviation-highlight {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            padding: 3rem 0;
+            margin: 2rem 0;
+            border-radius: 12px;
+        }
+        
+        .fms-section {
+            background: linear-gradient(135deg, #1e40af 0%, #0ea5e9 100%);
+            color: white;
+            padding: 3rem 0;
+        }
+        
+        footer {
+            background: #1e40af;
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 16px;
+            }
+            
+            .section {
+                padding: 4rem 0;
+            }
+            
+            .floating-nav {
+                display: none;
+            }
+            
+            .aviation-banner {
+                padding: 1rem;
+            }
+            
+            .aviation-banner-content {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .banner-separator {
+                width: 80%;
+                height: 1px;
+                margin: 0.5rem 0;
+            }
+            
+            .value-prop-highlight {
+                padding: 1.5rem;
+                margin: 2rem auto;
+            }
+            
+            .value-highlight-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .feature-card {
+                padding: 2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .hero {
+                padding: 2rem 0;
+            }
+            
+            .value-highlight-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .executive-badge {
+                font-size: 0.625rem;
+                padding: 4px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="hero">
+                <div class="executive-badge">
+                    ✈️ Mission-Critical Systems Leader
+                </div>
+                <h1>Soar Higher with Claude Code Aviation Solutions</h1>
+                <p>Transform mission-critical aviation software development for GE Aerospace's next-generation flight management and avionics systems</p>
+                <div class="value-prop-highlight">
+                    <div class="value-prop-content">
+                        <div class="metric-highlight">$92.3M</div>
+                        <div style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; color: rgba(255,255,255,0.95);">Estimated Annual Value Potential Across Aviation Software Portfolio</div>
+                        <div class="value-highlight-grid">
+                            <div class="value-highlight-item">
+                                <div class="value-highlight-number">14,000+</div>
+                                <div>Aircraft Monitored</div>
+                            </div>
+                            <div class="value-highlight-item">
+                                <div class="value-highlight-number">TrueCourse™</div>
+                                <div>FMS Technology</div>
+                            </div>
+                            <div class="value-highlight-item">
+                                <div class="value-highlight-number">Open</div>
+                                <div>Avionics Ecosystem</div>
+                            </div>
+                            <div class="value-highlight-item">
+                                <div class="value-highlight-number">DO-178C</div>
+                                <div>Safety Certified</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="cta-group">
+                    <a href="#" onclick="openFlightPulseDemo()" class="primary-cta" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); color: var(--primary-blue); border: 3px solid #ffffff; font-weight: 800; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 2px rgba(255, 255, 255, 0.5); font-size: 1.375rem; padding: 24px 56px;">
+                        🚀 Launch Live Demo
+                    </a>
+                    <a href="#executive-briefing" class="secondary-cta" style="background: rgba(255, 255, 255, 0.15); color: white; border: 2px solid rgba(255, 255, 255, 0.8); backdrop-filter: blur(8px);">
+                        🎯 Request Executive Summit
+                    </a>
+                </div>
+                <div class="hero-scroll-indicator">
+                    <span>Discover More</span>
+                    <span style="font-size: 1.5rem;">↓</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="aviation-banner">
+        <div class="container">
+            <div class="aviation-banner-content">
+                <div class="banner-stat">✈️ 14,000+ Aircraft</div>
+                <div class="banner-separator"></div>
+                <div class="banner-stat">🔗 3rd Gen Connected Systems</div>
+                <div class="banner-separator"></div>
+                <div class="banner-stat">✅ 100% Boeing 737 & Airbus Coverage</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Floating Navigation -->
+    <nav class="floating-nav">
+        <div class="nav-dot active" data-label="Overview" onclick="scrollToSection('hero')"></div>
+        <div class="nav-dot" data-label="Features" onclick="scrollToSection('features')"></div>
+        <div class="nav-dot" data-label="Demo" onclick="scrollToSection('demo')"></div>
+        <div class="nav-dot" data-label="Use Cases" onclick="scrollToSection('use-cases')"></div>
+        <div class="nav-dot" data-label="Contact" onclick="scrollToSection('executive-briefing')"></div>
+    </nav>
+    
+    <section class="section section-alt" id="features">
+        <div class="container">
+            <div class="executive-summary">
+                <h2 style="text-align: left; margin-bottom: 2rem; color: var(--primary-blue); font-size: clamp(1.5rem, 3vw, 2.25rem);">Executive Summary: TrueCourse™ Strategic AI Development Acceleration</h2>
+                <div style="background: linear-gradient(135deg, #eff6ff, #dbeafe); border-left: 4px solid var(--secondary-blue); padding: 2.5rem; margin: 2rem 0; border-radius: var(--border-radius-lg); box-shadow: var(--shadow-md);">
+                    <h4 style="color: var(--primary-blue); margin-bottom: 1rem; font-weight: 700;">Aviation Industry Reality</h4>
+                    <p style="color: var(--gray-700); font-size: 1.125rem; line-height: 1.7;">Safety-critical aviation software development faces unique challenges: rigorous certification requirements (DO-178C/DO-254), long development cycles, and the need to maintain backwards compatibility across thousands of aircraft. The industry demands AI development tools that understand both code complexity and regulatory compliance.</p>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 3rem;">
+                    <div style="background: white; padding: 2rem; border-radius: var(--border-radius-lg); box-shadow: var(--shadow-md);">
+                        <h4 style="color: var(--primary-blue); margin-bottom: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">📊 Market Dominance</h4>
+                        <ul style="color: var(--gray-700); line-height: 1.8; list-style: none; padding: 0;">
+                            <li style="margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.75rem;">✈️ 14,000+ commercial & military aircraft served</li>
+                            <li style="margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.75rem;">🛩️ 100% Boeing 737 variants and KC-46 coverage</li>
+                            <li style="margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.75rem;">🌍 Complete Airbus A320/A330 integration</li>
+                            <li style="display: flex; align-items: center; gap: 0.75rem;">💰 $92.3M projected annual development acceleration</li>
+                        </ul>
+                    </div>
+                    <div style="background: white; padding: 2rem; border-radius: var(--border-radius-lg); box-shadow: var(--shadow-md);">
+                        <h4 style="color: var(--primary-blue); margin-bottom: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">🚀 Innovation Leadership</h4>
+                        <ul style="color: var(--gray-700); line-height: 1.8; list-style: none; padding: 0;">
+                            <li style="margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.75rem;">🔗 3rd generation Connected FMS architecture</li>
+                            <li style="margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.75rem;">📱 Open avionics "app store" ecosystem</li>
+                            <li style="margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.75rem;">🔧 Modular TrueCourse™ certification approach</li>
+                            <li style="display: flex; align-items: center; gap: 0.75rem;">✅ DO-178C and DO-254 compliant development</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <h2>Accelerate Mission-Critical Aviation Development</h2>
+            <p class="section-subtitle">Transform your aviation software development with AI-powered tools designed for safety-critical systems and regulatory compliance.</p>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🛩️</div>
+                    <h3>Flight Management System Enhancement</h3>
+                    <p>Accelerate development of TrueCourse™ FMS software with modular, reusable components for faster certification and deployment across 14,000+ aircraft.</p>
+                    <div class="roi-highlight">50% Faster Certification Cycles</div>
+                    <a href="#" class="learn-more">Learn more →</a>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🔗</div>
+                    <h3>Connected FMS Development</h3>
+                    <p>Build sophisticated APIs and third-party integrations for Connected Flight Management Systems, enabling rapid ecosystem expansion and innovation.</p>
+                    <div class="roi-highlight">40% Reduction in Integration Time</div>
+                    <a href="#" class="learn-more">Learn more →</a>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Open Avionics Architecture</h3>
+                    <p>Streamline development of modular avionics applications that work across diverse aircraft platforms with shared computing resources and common frameworks.</p>
+                    <div class="roi-highlight">60% Faster Multi-Platform Development</div>
+                    <a href="#" class="learn-more">Learn more →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="video-section" id="demo">
+        <div class="container">
+            <h2 style="color: white;">Live Demo: FlightPulse Pro - Mission-Critical Engine Analytics</h2>
+            <p class="section-subtitle" style="color: rgba(255,255,255,0.9); margin-bottom: 3rem;">Experience how Claude Code accelerates development of safety-critical aviation software with real-time capabilities.</p>
+            <div class="video-container" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.2);">
+                <div style="display: grid; grid-template-columns: 1fr; gap: 2rem; text-align: left;">
+                    <div>
+                        <h3 style="margin-bottom: 1rem; font-size: 1.5rem;">Interactive Demonstration Features</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin: 2rem 0;">
+                            <div style="background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: var(--border-radius-md); border: 1px solid rgba(255,255,255,0.2);">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">✈️</div>
+                                <div style="font-weight: 700; margin-bottom: 0.5rem;">Live Flight Monitoring</div>
+                                <div style="font-size: 0.9rem; opacity: 0.8;">Real-time Flight GE2847 engine telemetry and performance metrics</div>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: var(--border-radius-md); border: 1px solid rgba(255,255,255,0.2);">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🕰</div>
+                                <div style="font-weight: 700; margin-bottom: 0.5rem;">Predictive Alerts</div>
+                                <div style="font-size: 0.9rem; opacity: 0.8;">72-hour maintenance window predictions with cost impact analysis</div>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: var(--border-radius-md); border: 1px solid rgba(255,255,255,0.2);">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">💰</div>
+                                <div style="font-weight: 700; margin-bottom: 0.5rem;">Cost Avoidance</div>
+                                <div style="font-size: 0.9rem; opacity: 0.8;">$2.3M potential savings simulation across global fleet operations</div>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: var(--border-radius-md); border: 1px solid rgba(255,255,255,0.2);">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🌍</div>
+                                <div style="font-weight: 700; margin-bottom: 0.5rem;">Fleet Impact</div>
+                                <div style="font-size: 0.9rem; opacity: 0.8;">Strategic insights across 14,000+ aircraft worldwide</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin: 3rem 0; text-align: center;">
+                    <a href="#" onclick="openFlightPulseDemo()" class="primary-cta" style="margin-right: 1rem;">
+                        🚀 Launch Interactive Demo
+                    </a>
+                    <a href="https://www.anthropic.com/claude-code" class="secondary-cta" target="_blank" style="border-color: rgba(255,255,255,0.5); color: rgba(255,255,255,0.9);">
+                        📚 Learn About Claude Code
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- FlightPulse Demo Modal -->
+    <div id="demo-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10000; overflow-y: auto;">
+        <div style="position: relative; width: 100%; height: 100%;">
+            <button onclick="closeFlightPulseDemo()" style="position: absolute; top: 20px; right: 20px; background: #dc2626; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; z-index: 10001; font-weight: bold;">✕ Close Demo</button>
+            <iframe id="demo-iframe" src="" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+
+    <section class="fms-section">
+        <div class="container">
+            <h2 style="color: white;">TrueCourse™ - Next-Generation Flight Management</h2>
+            <p class="section-subtitle" style="color: rgba(255,255,255,0.9); margin-bottom: 4rem;">Leading the industry with comprehensive flight management solutions across commercial and military aviation.</p>
+            <div class="impact-stats">
+                <div class="stat-card" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.2); transition: var(--transition-normal);" onmouseover="this.style.transform='translateY(-8px) scale(1.02)'; this.style.boxShadow='0 20px 40px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.1)'">
+                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">✈️</div>
+                    <span class="stat-number" style="color: white;">14K+</span>
+                    <div class="stat-label" style="color: rgba(255,255,255,0.8);">Aircraft with GE FMS<br>Commercial & Military</div>
+                </div>
+                <div class="stat-card" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.2); transition: var(--transition-normal);" onmouseover="this.style.transform='translateY(-8px) scale(1.02)'; this.style.boxShadow='0 20px 40px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.1)'">
+                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">🔗</div>
+                    <span class="stat-number" style="color: white;">3rd</span>
+                    <div class="stat-label" style="color: rgba(255,255,255,0.8);">Generation Connected FMS<br>Modular Architecture</div>
+                </div>
+                <div class="stat-card" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.2); transition: var(--transition-normal);" onmouseover="this.style.transform='translateY(-8px) scale(1.02)'; this.style.boxShadow='0 20px 40px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.1)'">
+                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">✅</div>
+                    <span class="stat-number" style="color: white;">100%</span>
+                    <div class="stat-label" style="color: rgba(255,255,255,0.8);">Boeing 737 Variants<br>KC-46 Coverage</div>
+                </div>
+                <div class="stat-card" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.2); transition: var(--transition-normal);" onmouseover="this.style.transform='translateY(-8px) scale(1.02)'; this.style.boxShadow='0 20px 40px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.1)'">
+                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">🌍</div>
+                    <span class="stat-number" style="color: white; font-size: 2.25rem;">A320/A330</span>
+                    <div class="stat-label" style="color: rgba(255,255,255,0.8);">Airbus Integration<br>Global Fleet Support</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="use-cases">
+        <div class="container">
+            <h2>Strategic Use Cases for GE Aerospace</h2>
+            <p class="section-subtitle">Discover how Claude Code transforms critical aviation development workflows across your entire technology stack.</p>
+            <div class="use-cases">
+                <div class="use-case" style="border-top: 4px solid var(--secondary-blue); position: relative; overflow: hidden; transition: var(--transition-normal);" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='var(--shadow-xl)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-md)'">
+                    <div style="position: absolute; top: 1rem; right: 1rem; width: 48px; height: 48px; background: linear-gradient(135deg, var(--secondary-blue), var(--accent-blue)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">🛩️</div>
+                    <h3 style="color: var(--primary-blue); margin-bottom: 1.5rem; padding-right: 4rem;">1. TrueCourse™ Modular FMS Development</h3>
+                    <p style="color: var(--gray-600); line-height: 1.7; margin-bottom: 2rem;">Accelerate development of segmented, reusable FMS components using Framework technology, enabling faster deployment across diverse aircraft platforms.</p>
+                    <div class="roi-metric" style="background: linear-gradient(135deg, var(--success-green), #059669); color: white; padding: 1rem 1.5rem; border-radius: var(--border-radius-md); font-weight: 700; display: flex; align-items: center; gap: 0.75rem;">
+                        <span>💰</span> ROI: $18.5M savings from 45% reduction in cross-platform development time
+                    </div>
+                </div>
+
+                <div class="use-case" style="border-top: 4px solid var(--accent-blue); position: relative; overflow: hidden; transition: var(--transition-normal);" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='var(--shadow-xl)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-md)'">
+                    <div style="position: absolute; top: 1rem; right: 1rem; width: 48px; height: 48px; background: linear-gradient(135deg, var(--accent-blue), var(--secondary-blue)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">📱</div>
+                    <h3 style="color: var(--primary-blue); margin-bottom: 1.5rem; padding-right: 4rem;">2. FlightPulse EFB Application Enhancement</h3>
+                    <p style="color: var(--gray-600); line-height: 1.7; margin-bottom: 2rem;">Rapidly build new safety and efficiency modules for the FlightPulse Electronic Flight Bag, helping pilots optimize fuel consumption and operational performance.</p>
+                    <div class="roi-metric" style="background: linear-gradient(135deg, var(--success-green), #059669); color: white; padding: 1rem 1.5rem; border-radius: var(--border-radius-md); font-weight: 700; display: flex; align-items: center; gap: 0.75rem;">
+                        <span>💰</span> ROI: $12.7M value from enhanced pilot efficiency and fuel optimization features
+                    </div>
+                </div>
+
+                <div class="use-case" style="border-top: 4px solid var(--success-green); position: relative; overflow: hidden; transition: var(--transition-normal);" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='var(--shadow-xl)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-md)'">
+                    <div style="position: absolute; top: 1rem; right: 1rem; width: 48px; height: 48px; background: linear-gradient(135deg, var(--success-green), #059669); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">🛡️</div>
+                    <h3 style="color: var(--primary-blue); margin-bottom: 1.5rem; padding-right: 4rem;">3. Safety Insight FOQA Platform Expansion</h3>
+                    <p style="color: var(--gray-600); line-height: 1.7; margin-bottom: 2rem;">Scale the leading Flight Operations Quality Assurance solution with advanced analytics, predictive maintenance, and real-time safety monitoring capabilities.</p>
+                    <div class="roi-metric" style="background: linear-gradient(135deg, var(--success-green), #059669); color: white; padding: 1rem 1.5rem; border-radius: var(--border-radius-md); font-weight: 700; display: flex; align-items: center; gap: 0.75rem;">
+                        <span>💰</span> ROI: $25.3M market value from enhanced safety analytics and compliance features
+                    </div>
+                </div>
+
+                <div class="use-case" style="border-top: 4px solid var(--warning-orange); position: relative; overflow: hidden; transition: var(--transition-normal);" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='var(--shadow-xl)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-md)'">
+                    <div style="position: absolute; top: 1rem; right: 1rem; width: 48px; height: 48px; background: linear-gradient(135deg, var(--warning-orange), #d97706); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">📱</div>
+                    <h3 style="color: var(--primary-blue); margin-bottom: 1.5rem; padding-right: 4rem;">4. Open Avionics Ecosystem Development</h3>
+                    <p style="color: var(--gray-600); line-height: 1.7; margin-bottom: 2rem;">Build the aviation "app store" infrastructure enabling third-party developers to create innovative applications for GE's open avionics platform.</p>
+                    <div class="roi-metric" style="background: linear-gradient(135deg, var(--success-green), #059669); color: white; padding: 1rem 1.5rem; border-radius: var(--border-radius-md); font-weight: 700; display: flex; align-items: center; gap: 0.75rem;">
+                        <span>💰</span> ROI: $35.8M revenue potential from ecosystem partnership and licensing opportunities
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section section-alt">
+        <div class="container">
+            <div class="aviation-highlight">
+                <h2 style="color: var(--primary-blue);">Comprehensive Avionics Solutions Portfolio</h2>
+                <p class="section-subtitle">Accelerate development across the entire avionics technology stack with Claude Code's AI-powered development platform.</p>
+                <div class="container">
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">💻</div>
+                            <h3>Computing Systems & Controls</h3>
+                            <p>Develop next-generation computing platforms with shared resources and open architecture for maximum flexibility and performance.</p>
+                            <a href="#" class="learn-more">Learn more →</a>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">🔗</div>
+                            <h3>Digital Backbone Networks</h3>
+                            <p>Build robust communication systems that connect all aircraft systems with high reliability and real-time data exchange capabilities.</p>
+                            <a href="#" class="learn-more">Learn more →</a>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">❤️‍🩹</div>
+                            <h3>Health Awareness Systems</h3>
+                            <p>Create predictive maintenance and system monitoring solutions that enhance aircraft availability and operational safety.</p>
+                            <a href="#" class="learn-more">Learn more →</a>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">🧭</div>
+                            <h3>Navigation & Guidance</h3>
+                            <p>Develop precise inertial reference systems and alternate navigation solutions for all-weather, all-terrain flight operations.</p>
+                            <a href="#" class="learn-more">Learn more →</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <h2>SaaS Solutions for Aviation Excellence</h2>
+            <p class="section-subtitle">Cloud-native development platforms designed specifically for aviation's unique operational and regulatory requirements.</p>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📈</div>
+                    <h3>Flight Operations Optimization</h3>
+                    <p>Build comprehensive analytics platforms that help operators understand data, optimize routes, and achieve sustainability targets with AI-powered insights.</p>
+                    <div class="roi-highlight">35% Route Efficiency Gains</div>
+                    <a href="#" class="learn-more">Learn more →</a>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🔧</div>
+                    <h3>Technical Operations Support</h3>
+                    <p>Develop maintenance and reliability analytics that minimize downtime, predict component failures, and optimize fleet utilization across global operations.</p>
+                    <div class="roi-highlight">28% Downtime Reduction</div>
+                    <a href="#" class="learn-more">Learn more →</a>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">✅</div>
+                    <h3>Certification & Compliance</h3>
+                    <p>Streamline development of safety-critical software with automated testing, documentation, and regulatory compliance verification for faster certification.</p>
+                    <div class="roi-highlight">65% Faster Compliance</div>
+                    <a href="#" class="learn-more">Learn more →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div style="background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%); color: white; padding: 4rem 2rem; border-radius: 20px; text-align: center;" id="executive-briefing">
+                <h2 style="color: white; margin-bottom: 2rem;">Executive Aviation Summit: Mission-Critical AI Development Strategy</h2>
+                <div class="trust-indicators" style="justify-content: center; margin: 2rem 0;">
+                    <div class="trust-badge" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); color: white;">DO-178C Ready</div>
+                    <div class="trust-badge" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); color: white;">FAA/EASA Certified</div>
+                    <div class="trust-badge" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); color: white;">Safety-Critical</div>
+                    <div class="trust-badge" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); color: white;">Global Fleet Scale</div>
+                </div>
+                <p style="font-size: 1.3rem; margin-bottom: 3rem; opacity: 0.95;">Join aerospace industry executives in an exclusive summit on AI-accelerated development for safety-critical aviation systems.</p>
+                <div style="margin-top: 3rem;">
+                    <a href="mailto:enterprise@anthropic.com?subject=Executive Aviation Summit - GE Aerospace AI Strategy&body=Dear Anthropic Enterprise Team,%0A%0AI am requesting an executive aviation summit for GE Aerospace leadership regarding Claude Code's strategic applications in safety-critical flight management and avionics development.%0A%0APlease coordinate a confidential briefing focused on our TrueCourse FMS acceleration and open avionics ecosystem expansion.%0A%0ARegards," class="primary-cta" style="font-size: 1.25rem; padding: 24px 52px;">
+                        🎯 Request Executive Summit
+                    </a>
+                    <div style="margin-top: 2rem; padding: 1.5rem; background: rgba(255,255,255,0.1); border-radius: var(--border-radius-md); backdrop-filter: blur(16px);">
+                        <div style="font-weight: 700; margin-bottom: 1rem; font-size: 1.125rem;">Summit Agenda Highlights</div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; font-size: 0.9rem; opacity: 0.9;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">✈️ TrueCourse™ Roadmap</div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">📄 Safety Certification</div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">🌍 Fleet Impact Analysis</div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">🚀 Development ROI</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 3rem; text-align: center; padding: 2rem; background: #eff6ff; border-radius: 12px;">
+                <h3 style="color: #1e40af; margin-bottom: 1rem;">Technical Certification Track</h3>
+                <p style="color: #374151; margin-bottom: 2rem;">For engineering teams and safety-critical system integration</p>
+                <a href="mailto:sales@anthropic.com?subject=Claude Code Aviation Certification Track - GE Aerospace" class="secondary-cta">Schedule Certification Review</a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem; padding: 3rem 0;">
+            <div>
+                <h4 style="color: white; margin-bottom: 1rem;">Aviation Enterprise Contact</h4>
+                <p style="opacity: 0.8;">enterprise@anthropic.com</p>
+                <p style="opacity: 0.8;">Safety-Critical Systems Priority</p>
+            </div>
+            <div>
+                <h4 style="color: white; margin-bottom: 1rem;">Aviation Certification</h4>
+                <p style="opacity: 0.8;">DO-178C/DO-254 Compliant</p>
+                <p style="opacity: 0.8;">FAA/EASA Certification Ready</p>
+            </div>
+            <div>
+                <h4 style="color: white; margin-bottom: 1rem;">Strategic Partnership</h4>
+                <p style="opacity: 0.8;">TrueCourse™ FMS Acceleration</p>
+                <p style="opacity: 0.8;">14,000+ Aircraft Innovation</p>
+            </div>
+        </div>
+        <div style="text-align: center; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.2);">
+            <p>&copy; 2025 Anthropic. Claude Code - Elevating Aviation Software Development</p>
+        </div>
+    </footer>
+    
+    <script>
+        function openFlightPulseDemo() {
+            const modal = document.getElementById('demo-modal');
+            const iframe = document.getElementById('demo-iframe');
+            iframe.src = 'flightpulse-demo.html';
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeFlightPulseDemo() {
+            const modal = document.getElementById('demo-modal');
+            const iframe = document.getElementById('demo-iframe');
+            modal.style.display = 'none';
+            iframe.src = '';
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Close demo on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeFlightPulseDemo();
+            }
+        });
+        
+        // Floating navigation
+        function scrollToSection(sectionId) {
+            const element = sectionId === 'hero' ? document.querySelector('header') : document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+        
+        // Update active nav dot on scroll
+        window.addEventListener('scroll', function() {
+            const sections = ['hero', 'features', 'demo', 'use-cases', 'executive-briefing'];
+            const navDots = document.querySelectorAll('.nav-dot');
+            let currentSection = 0;
+            
+            sections.forEach((sectionId, index) => {
+                const element = sectionId === 'hero' ? document.querySelector('header') : document.getElementById(sectionId);
+                if (element) {
+                    const rect = element.getBoundingClientRect();
+                    if (rect.top <= window.innerHeight / 2 && rect.bottom >= window.innerHeight / 2) {
+                        currentSection = index;
+                    }
+                }
+            });
+            
+            navDots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentSection);
+            });
+        });
+        
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+        
+        // Observe feature cards for stagger animation
+        document.addEventListener('DOMContentLoaded', function() {
+            const featureCards = document.querySelectorAll('.feature-card');
+            featureCards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                card.style.transition = `opacity 0.6s ease-out ${index * 0.1}s, transform 0.6s ease-out ${index * 0.1}s`;
+                observer.observe(card);
+            });
+        });
+    </script>
+</body>
+</html>

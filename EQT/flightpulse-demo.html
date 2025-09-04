@@ -1,0 +1,2031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlightPulse Pro - Jet Engine Health Analytics</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0f1419;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+        
+        .demo-header {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .flight-info {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ef4444;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .main-dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr 400px;
+            gap: 2rem;
+            padding: 2rem;
+            height: calc(100vh - 80px);
+        }
+        
+        .fleet-overview {
+            background: #1a1f2e;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 2rem 0 2rem;
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .fleet-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .fleet-metric-card {
+            text-align: center;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        .fleet-alerts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .fleet-alert-card {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            border-radius: 8px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .fleet-alert-card:hover {
+            background: rgba(239, 68, 68, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .fleet-alert-card.advisory {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: #f59e0b;
+        }
+        
+        .fleet-alert-card.advisory:hover {
+            background: rgba(245, 158, 11, 0.15);
+        }
+        
+        .engine-visual {
+            background: #1a1f2e;
+            border-radius: 12px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .engine-diagram {
+            width: 100%;
+            max-width: 400px;
+            height: 400px;
+            position: relative;
+            margin: 2rem auto;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .engine-diagram:hover {
+            transform: scale(1.02);
+        }
+        
+        .engine-core {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, #1e293b 0%, #0f172a 100%);
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #e2e8f0;
+            border: 3px solid #334155;
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.3), inset 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+        
+        .engine-core::before {
+            content: '';
+            position: absolute;
+            width: 85%;
+            height: 85%;
+            background: conic-gradient(from 0deg, #ef4444 0%, #f97316 25%, #eab308 50%, #22c55e 75%, #3b82f6 100%);
+            border-radius: 50%;
+            opacity: 0.4;
+            animation: engineRotate 4s linear infinite;
+        }
+        
+        .engine-status-ring {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border: 4px solid transparent;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, #ef4444 0%, #ef4444 30%, transparent 30%, transparent 70%, #f59e0b 70%, #f59e0b 85%, transparent 85%);
+            mask: radial-gradient(circle, transparent 70%, black 72%);
+            -webkit-mask: radial-gradient(circle, transparent 70%, black 72%);
+            animation: statusPulse 2s ease-in-out infinite alternate;
+        }
+        
+        .engine-components {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        
+        .component-indicator {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            pointer-events: auto;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .component-indicator:hover {
+            transform: scale(1.5);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+        }
+        
+        .component-indicator.critical {
+            background: #ef4444;
+            animation: criticalBlink 1s ease-in-out infinite alternate;
+        }
+        
+        .component-indicator.warning {
+            background: #f59e0b;
+            animation: warningPulse 2s ease-in-out infinite alternate;
+        }
+        
+        .component-indicator.normal {
+            background: #22c55e;
+        }
+        
+        .component-tooltip {
+            position: absolute;
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .component-indicator:hover .component-tooltip {
+            opacity: 1;
+            transform: translateY(-30px);
+        }
+        
+        @keyframes engineRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes statusPulse {
+            0% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+        
+        @keyframes criticalBlink {
+            0% { opacity: 0.5; box-shadow: 0 0 10px #ef4444; }
+            100% { opacity: 1; box-shadow: 0 0 20px #ef4444; }
+        }
+        
+        @keyframes warningPulse {
+            0% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+        
+        .metrics-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .metric-card {
+            background: #1a1f2e;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid #374151;
+        }
+        
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #ef4444;
+            margin-bottom: 0.5rem;
+        }
+        
+        .metric-normal {
+            color: #10b981;
+        }
+        
+        .metric-warning {
+            color: #f59e0b;
+        }
+        
+        .ai-panel {
+            background: #1a1f2e;
+            border-radius: 12px;
+            padding: 2rem;
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .claude-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .claude-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .alert-item {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-severity {
+            color: #ef4444;
+            font-weight: bold;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        
+        .cost-impact {
+            background: linear-gradient(135deg, #059669, #047857);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .cost-value {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #ffffff;
+        }
+        
+        .predictive-timeline {
+            margin-top: 2rem;
+        }
+        
+        .timeline-bar {
+            width: 100%;
+            height: 8px;
+            background: #374151;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        
+        .timeline-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #f59e0b, #ef4444);
+            width: 75%;
+            animation: timelineProgress 5s ease-in-out infinite;
+        }
+        
+        @keyframes timelineProgress {
+            0%, 100% { width: 75%; }
+            50% { width: 85%; }
+        }
+        
+        .interactive-controls {
+            margin-top: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .control-button {
+            background: #374151;
+            border: 1px solid #4b5563;
+            color: #ffffff;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .control-button:hover {
+            background: #4b5563;
+            transform: translateY(-2px);
+        }
+        
+        .development-stats {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(30, 64, 175, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        .claude-badge {
+            background: #3b82f6;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+        
+        .drill-down-highlight {
+            animation: highlightPulse 2s ease-in-out;
+        }
+        
+        @keyframes highlightPulse {
+            0%, 100% { box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+            50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-header">
+        <div class="flight-info">
+            <div class="status-indicator"></div>
+            <div>
+                <div style="font-size: 1.5rem; font-weight: bold;">Flight GE2847</div>
+                <div style="opacity: 0.8;">Boeing 737 MAX • 35,000 ft • 450 PAX</div>
+            </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="display: flex; gap: 0.5rem;">
+                <button class="control-button" onclick="switchMainTab('monitoring')" id="monitoring-tab" style="background: #3b82f6; padding: 8px 16px;">🔧 Engine Monitoring</button>
+                <button class="control-button" onclick="switchMainTab('executive')" id="executive-tab" style="padding: 8px 16px;">📊 Executive Intelligence</button>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 1.2rem; font-weight: bold;">Engine Health Status</div>
+                <div style="color: #ef4444;">⚠️ PREDICTIVE ALERT</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Permanent Fleet Overview - Always Visible -->
+    <div class="fleet-overview">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <div>
+                <h3 style="color: #3b82f6; margin-bottom: 0.5rem;">🌐 Global Fleet Status</h3>
+                <div style="font-size: 0.9rem; opacity: 0.8;">Real-time monitoring across 14,247 engines worldwide</div>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 0.9rem; color: #10b981;">● Live Data</div>
+                <div style="font-size: 0.8rem; opacity: 0.7;">Updated every 30 seconds</div>
+            </div>
+        </div>
+        
+        <div class="fleet-metrics">
+            <div class="fleet-metric-card">
+                <div style="font-size: 1.8rem; font-weight: bold; color: #3b82f6; margin-bottom: 0.5rem;">14,247</div>
+                <div style="font-size: 0.9rem;">Aircraft Monitored</div>
+                <div style="font-size: 0.8rem; color: #10b981; margin-top: 0.3rem;">+47 this week</div>
+            </div>
+            <div class="fleet-metric-card">
+                <div style="font-size: 1.8rem; font-weight: bold; color: #10b981; margin-bottom: 0.5rem;">99.7%</div>
+                <div style="font-size: 0.9rem;">Fleet Availability</div>
+                <div style="font-size: 0.8rem; color: #10b981; margin-top: 0.3rem;">Above 99.5% target</div>
+            </div>
+            <div class="fleet-metric-card">
+                <div style="font-size: 1.8rem; font-weight: bold; color: #f59e0b; margin-bottom: 0.5rem;">3</div>
+                <div style="font-size: 0.9rem;">Active Alerts</div>
+                <div style="font-size: 0.8rem; color: #ef4444; margin-top: 0.3rem;">1 critical, 2 advisory</div>
+            </div>
+            <div class="fleet-metric-card">
+                <div style="font-size: 1.8rem; font-weight: bold; color: #10b981; margin-bottom: 0.5rem;">$47.8M</div>
+                <div style="font-size: 0.9rem;">Costs Avoided</div>
+                <div style="font-size: 0.8rem; color: #10b981; margin-top: 0.3rem;">This month</div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 1.5rem;">
+            <h4 style="color: #ef4444; margin-bottom: 0.8rem;">⚠️ Priority Alerts Requiring Action</h4>
+            <div class="fleet-alerts">
+                <div class="fleet-alert-card" onclick="drillDownToEngine('AA2847', 'critical')">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-weight: bold; color: #ef4444; margin-bottom: 0.3rem;">🔴 CRITICAL - Flight AA2847</div>
+                            <div style="font-size: 0.9rem; margin-bottom: 0.3rem;">Boeing 737 MAX • Engine #2 • 35,000ft</div>
+                            <div style="font-size: 0.8rem; opacity: 0.9;">Turbine blade fatigue detected - 67hrs to maintenance</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 1rem; font-weight: bold; color: #ef4444;">$2.3M</div>
+                            <div style="font-size: 0.8rem;">Risk Value</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="fleet-alert-card advisory" onclick="drillDownToEngine('DL4532', 'advisory')">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-weight: bold; color: #f59e0b; margin-bottom: 0.3rem;">🟡 ADVISORY - Flight DL4532</div>
+                            <div style="font-size: 0.9rem; margin-bottom: 0.3rem;">Boeing 757 • Engine #1 • 28,000ft</div>
+                            <div style="font-size: 0.8rem; opacity: 0.9;">Oil filter efficiency declining - schedule maintenance</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 1rem; font-weight: bold; color: #f59e0b;">$450K</div>
+                            <div style="font-size: 0.8rem;">Prevention</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="fleet-alert-card advisory" onclick="drillDownToEngine('UA8721', 'advisory')">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-weight: bold; color: #f59e0b; margin-bottom: 0.3rem;">🟡 ADVISORY - Flight UA8721</div>
+                            <div style="font-size: 0.9rem; margin-bottom: 0.3rem;">Boeing 777 • Engine #2 • Ground: JFK</div>
+                            <div style="font-size: 0.8rem; opacity: 0.9;">Fuel nozzle performance low - inspect before takeoff</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 1rem; font-weight: bold; color: #f59e0b;">$180K</div>
+                            <div style="font-size: 0.8rem;">Prevention</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monitoring Dashboard Tab -->
+    <div id="monitoring-dashboard" class="main-dashboard">
+        <div class="engine-visual">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3>Engine #2 - Real-Time Visualization</h3>
+                <div style="display: flex; gap: 1rem; font-size: 0.9rem;">
+                    <div style="color: #ef4444;">🔴 2 Critical</div>
+                    <div style="color: #f59e0b;">🟡 1 Warning</div>
+                    <div style="color: #22c55e;">🟢 5 Normal</div>
+                </div>
+            </div>
+            <div class="engine-diagram" onclick="showEngineDetails()">
+                <div class="engine-core">
+                    <div style="z-index: 10; text-align: center;">
+                        <div style="font-size: 1.8rem;">CFM LEAP-1B</div>
+                        <div style="font-size: 0.9rem; opacity: 0.8; margin-top: 0.5rem;">Click for details</div>
+                    </div>
+                </div>
+                <div class="engine-status-ring"></div>
+                <div class="engine-components">
+                    <!-- Turbine (Critical) -->
+                    <div class="component-indicator critical" style="top: 15%; right: 25%;" onmouseover="showTooltip(this, 'High-Pressure Turbine: 1,847°F - CRITICAL')">
+                        <div class="component-tooltip"></div>
+                    </div>
+                    <!-- Combustor (Critical) -->
+                    <div class="component-indicator critical" style="top: 40%; left: 10%;" onmouseover="showTooltip(this, 'Combustor: Blade fatigue detected - CRITICAL')">
+                        <div class="component-tooltip"></div>
+                    </div>
+                    <!-- Oil System (Warning) -->
+                    <div class="component-indicator warning" style="bottom: 20%; left: 30%;" onmouseover="showTooltip(this, 'Oil Pressure: 42.3 PSI - Monitoring')">
+                        <div class="component-tooltip"></div>
+                    </div>
+                    <!-- Fan Assembly (Normal) -->
+                    <div class="component-indicator normal" style="top: 10%; left: 50%;" onmouseover="showTooltip(this, 'Fan Assembly: 4,250 RPM - Optimal')">
+                        <div class="component-tooltip"></div>
+                    </div>
+                    <!-- Compressor (Normal) -->
+                    <div class="component-indicator normal" style="top: 30%; right: 15%;" onmouseover="showTooltip(this, 'Low-Pressure Compressor: Normal')">
+                        <div class="component-tooltip"></div>
+                    </div>
+                    <!-- Fuel System (Normal) -->
+                    <div class="component-indicator normal" style="bottom: 15%; right: 35%;" onmouseover="showTooltip(this, 'Fuel Nozzles: Operating normally')">
+                        <div class="component-tooltip"></div>
+                    </div>
+                    <!-- Sensors (Normal) -->
+                    <div class="component-indicator normal" style="bottom: 35%; left: 15%;" onmouseover="showTooltip(this, 'Temperature Sensors: All functional')">
+                        <div class="component-tooltip"></div>
+                    </div>
+                    <!-- Vibration Monitor (Normal) -->
+                    <div class="component-indicator normal" style="top: 60%; right: 10%;" onmouseover="showTooltip(this, 'Vibration Monitor: 3.2 - Elevated but stable')">
+                        <div class="component-tooltip"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="metrics-panel">
+                <div class="metric-card" onclick="highlightComponent('turbine')" style="cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <div class="metric-value" id="temp-gauge" style="color: #ef4444;">1,847°F</div>
+                    <div>Turbine Temp</div>
+                    <div style="font-size: 0.8rem; color: #ef4444; display: flex; align-items: center; gap: 0.3rem;">
+                        <span style="animation: blink 1s infinite;">🔥</span>
+                        <span>↗ Critical - Immediate attention required</span>
+                    </div>
+                </div>
+                <div class="metric-card" onclick="highlightComponent('oil')" style="cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <div class="metric-value metric-normal" id="pressure-gauge">42.3</div>
+                    <div>Oil Pressure (PSI)</div>
+                    <div style="font-size: 0.8rem; color: #10b981; display: flex; align-items: center; gap: 0.3rem;">
+                        <span>✓</span>
+                        <span>Normal - Within operating range</span>
+                    </div>
+                </div>
+                <div class="metric-card" onclick="highlightComponent('vibration')" style="cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <div class="metric-value metric-warning" id="vibration-gauge">3.2</div>
+                    <div>Vibration (mm/s)</div>
+                    <div style="font-size: 0.8rem; color: #f59e0b; display: flex; align-items: center; gap: 0.3rem;">
+                        <span>⚠</span>
+                        <span>Elevated - Monitoring closely</span>
+                    </div>
+                </div>
+                <div class="metric-card" onclick="highlightComponent('fan')" style="cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <div class="metric-value metric-normal" id="rpm-gauge">4,250</div>
+                    <div>Fan RPM</div>
+                    <div style="font-size: 0.8rem; color: #10b981; display: flex; align-items: center; gap: 0.3rem;">
+                        <span>✓</span>
+                        <span>Optimal - Performance excellent</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 2rem; padding: 1rem; background: #1a1f2e; border-radius: 8px; border-left: 4px solid #ef4444;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <div style="color: #ef4444; font-size: 1.2rem;">⚠</div>
+                    <div style="font-weight: bold; color: #ef4444;">Critical Alert</div>
+                </div>
+                <div style="font-size: 0.9rem; margin-bottom: 0.5rem;">High-pressure turbine blade fatigue detected. Temperature exceeding safe operational limits.</div>
+                <div style="display: flex; gap: 1rem; font-size: 0.8rem;">
+                    <div><strong>Recommended Action:</strong> Immediate landing and inspection</div>
+                    <div><strong>Risk Level:</strong> High ($2.3M potential cost)</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="background: #1a1f2e; border-radius: 12px; padding: 2rem;">
+            <h3>Fleet Health Matrix Visualization</h3>
+            <div style="margin-top: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <div style="font-size: 0.9rem; opacity: 0.8;">Sample: 500 Engines from Global Fleet</div>
+                    <button class="control-button" onclick="toggleFleetView()" id="fleet-toggle">📊 Detailed View</button>
+                </div>
+                <div id="fleet-summary">
+                    <div id="engine-grid" style="display: grid; grid-template-columns: repeat(25, 1fr); gap: 2px; max-height: 200px; overflow-y: auto; padding: 1rem; background: #000; border-radius: 8px;">
+                        <!-- Engine status dots will be generated here -->
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; font-size: 0.8rem;">
+                        <div style="display: flex; gap: 1rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%;"></div>
+                                <span>Optimal (94.2%)</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <div style="width: 8px; height: 8px; background: #f59e0b; border-radius: 50%;"></div>
+                                <span>Advisory (5.6%)</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <div style="width: 8px; height: 8px; background: #ef4444; border-radius: 50%;"></div>
+                                <span>Critical (0.2%)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="fleet-detailed" style="display: none;">
+                    <!-- Fleet visualization will be inserted here -->
+                </div>
+            </div>
+            
+            <div style="background: #1a1f2e; border-radius: 12px; padding: 2rem; margin-top: 2rem;">
+                <h3>Development Acceleration</h3>
+                <div style="margin-top: 1rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>Traditional Development</span>
+                        <span>18 months</span>
+                    </div>
+                    <div style="width: 100%; height: 8px; background: #374151; border-radius: 4px;">
+                        <div style="width: 100%; height: 100%; background: #6b7280; border-radius: 4px;"></div>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; margin: 1rem 0 0.5rem;">
+                        <span>With Claude Code</span>
+                        <span>7 months</span>
+                    </div>
+                    <div style="width: 100%; height: 8px; background: #374151; border-radius: 4px;">
+                        <div style="width: 40%; height: 100%; background: #3b82f6; border-radius: 4px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ai-panel">
+            <div class="claude-header">
+                <div class="claude-avatar">C</div>
+                <div>
+                    <div style="font-weight: bold;">Claude Code Analysis</div>
+                    <div style="font-size: 0.9rem; opacity: 0.8;">Predictive Maintenance</div>
+                </div>
+            </div>
+
+            <div class="alert-item">
+                <div class="alert-severity">🔴 CRITICAL - 67H WINDOW</div>
+                <div><strong>Flight AA2847 (Current):</strong> High-pressure turbine blade showing metal fatigue indicators. Recommend immediate maintenance scheduling.</div>
+                <div style="font-size: 0.8rem; margin-top: 0.5rem; opacity: 0.8;">📊 Fleet Impact: 1 of 14,247 engines requiring immediate attention</div>
+            </div>
+
+            <div class="alert-item" style="border-color: #f59e0b; background: rgba(245, 158, 11, 0.1);">
+                <div class="alert-severity" style="color: #f59e0b;">🟡 FLEET ADVISORIES (2)</div>
+                <div><strong>Preventive Maintenance Queue:</strong> Oil filter efficiency declining on DL4532, fuel nozzle performance low on UA8721.</div>
+                <div style="font-size: 0.8rem; margin-top: 0.5rem; opacity: 0.8;">📊 Fleet Status: 5.6% advisory alerts across global operations</div>
+            </div>
+
+            <div class="cost-impact">
+                <div style="font-size: 1rem; margin-bottom: 0.5rem;">Avoided Cost Impact</div>
+                <div class="cost-value">$2.3M</div>
+                <div style="font-size: 0.9rem; opacity: 0.9;">Engine replacement + downtime</div>
+            </div>
+
+            <div class="predictive-timeline">
+                <h4>Maintenance Window Prediction</h4>
+                <div class="timeline-bar">
+                    <div class="timeline-progress"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+                    <span>Now</span>
+                    <span style="color: #ef4444; font-weight: bold;">72 Hours</span>
+                </div>
+            </div>
+            
+            <div class="interactive-controls">
+                <button class="control-button" onclick="simulateScenario('normal')">Normal Flight</button>
+                <button class="control-button" onclick="simulateScenario('stress')">Stress Test</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Executive Intelligence Dashboard Tab -->
+    <div id="executive-dashboard" class="main-dashboard" style="display: none;">
+        <!-- Optimized Executive Header -->
+        <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 1.5rem; border: 1px solid #334155; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);">
+            <div style="display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: center;">
+                <div>
+                    <h1 style="color: #e2e8f0; margin: 0 0 0.3rem 0; font-size: 1.8rem; font-weight: 600;">🛡️ Executive Safety Intelligence</h1>
+                    <div style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 0.5rem;">CEO Larry Culp • GE Aerospace Global Operations</div>
+                    <div style="display: flex; gap: 1.5rem; font-size: 0.85rem;">
+                        <span style="color: #10b981;">● Live Monitoring</span>
+                        <span style="color: #94a3b8;">14,247 Engines</span>
+                        <span style="color: #94a3b8;">Updated 30s ago</span>
+                    </div>
+                </div>
+                <div style="text-align: center; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 1rem 1.5rem;">
+                    <div style="font-size: 2.5rem; color: #10b981; font-weight: 800; margin-bottom: 0.2rem; line-height: 1;">99.98%</div>
+                    <div style="color: #10b981; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Safety Rating</div>
+                    <div style="background: #10b981; color: white; font-size: 0.7rem; padding: 0.2rem 0.6rem; border-radius: 8px; font-weight: 600;">30 DAYS ZERO INCIDENTS</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Executive KPI Cards -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+            <!-- Safety Incidents & Preventive Actions -->
+            <div class="executive-metric-card" onclick="highlightMetric(this, 'safety')" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border-radius: 16px; padding: 2rem; border: 1px solid rgba(16, 185, 129, 0.2); cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(16, 185, 129, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.2)'">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
+                    <div>
+                        <div style="color: #10b981; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.5rem; letter-spacing: 0.05em;">🛡️ SAFETY PERFORMANCE</div>
+                        <div style="color: #e2e8f0; font-size: 0.9rem; opacity: 0.8;">30-Day Safety Record</div>
+                    </div>
+                    <div style="background: #10b981; color: white; padding: 0.3rem 0.8rem; border-radius: 12px; font-size: 0.7rem; font-weight: bold;">EXCELLENT</div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 1.5rem;">
+                    <div>
+                        <div style="font-size: 3rem; font-weight: 900; color: #10b981; line-height: 1; margin-bottom: 0.2rem;">0</div>
+                        <div style="font-size: 0.9rem; color: #94a3b8;">Safety Incidents</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 3rem; font-weight: 900; color: #f59e0b; line-height: 1; margin-bottom: 0.2rem;">847</div>
+                        <div style="font-size: 0.9rem; color: #94a3b8;">Preventive Actions</div>
+                    </div>
+                </div>
+                
+                <div style="background: rgba(16, 185, 129, 0.08); border-radius: 8px; padding: 0.8rem; border-left: 3px solid #10b981;">
+                    <div style="color: #10b981; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.2rem;">Achievement Unlocked</div>
+                    <div style="color: #e2e8f0; font-size: 0.85rem;">Industry-leading safety record: 100% better than aviation industry average</div>
+                </div>
+            </div>
+            
+            <!-- Financial Impact & AI Performance -->
+            <div class="executive-metric-card" onclick="highlightMetric(this, 'business')" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border-radius: 16px; padding: 2rem; border: 1px solid rgba(59, 130, 246, 0.2); cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(59, 130, 246, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.2)'">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
+                    <div>
+                        <div style="color: #3b82f6; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.5rem; letter-spacing: 0.05em;">💰 BUSINESS IMPACT</div>
+                        <div style="color: #e2e8f0; font-size: 0.9rem; opacity: 0.8;">AI-Driven Value Creation</div>
+                    </div>
+                    <div style="background: #3b82f6; color: white; padding: 0.3rem 0.8rem; border-radius: 12px; font-size: 0.7rem; font-weight: bold;">HIGH ROI</div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 1.5rem;">
+                    <div>
+                        <div style="font-size: 3rem; font-weight: 900; color: #3b82f6; line-height: 1; margin-bottom: 0.2rem;">$47M</div>
+                        <div style="font-size: 0.9rem; color: #94a3b8;">Risk Prevented</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 3rem; font-weight: 900; color: #8b5cf6; line-height: 1; margin-bottom: 0.2rem;">94.7%</div>
+                        <div style="font-size: 0.9rem; color: #94a3b8;">AI Accuracy</div>
+                    </div>
+                </div>
+                
+                <div style="background: rgba(59, 130, 246, 0.08); border-radius: 8px; padding: 0.8rem; border-left: 3px solid #3b82f6;">
+                    <div style="color: #3b82f6; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.2rem;">Strategic Success</div>
+                    <div style="color: #e2e8f0; font-size: 0.85rem;">1,847% ROI on safety systems • 12% improvement with Claude Code integration</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Secondary KPI Row -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+            <div style="background: #1e293b; border-radius: 12px; padding: 1.5rem; border: 1px solid rgba(16, 185, 129, 0.2); text-align: center;">
+                <div style="color: #10b981; font-size: 2rem; font-weight: 800; margin-bottom: 0.3rem;">99.7%</div>
+                <div style="color: #94a3b8; font-size: 0.8rem;">Fleet Availability</div>
+                <div style="color: #10b981; font-size: 0.7rem; margin-top: 0.3rem;">Above 99% target</div>
+            </div>
+            
+            <div style="background: #1e293b; border-radius: 12px; padding: 1.5rem; border: 1px solid rgba(245, 158, 11, 0.2); text-align: center;">
+                <div style="color: #f59e0b; font-size: 2rem; font-weight: 800; margin-bottom: 0.3rem;">5.6%</div>
+                <div style="color: #94a3b8; font-size: 0.8rem;">Unscheduled Events</div>
+                <div style="color: #f59e0b; font-size: 0.7rem; margin-top: 0.3rem;">Below 8% target</div>
+            </div>
+            
+            <div style="background: #1e293b; border-radius: 12px; padding: 1.5rem; border: 1px solid rgba(16, 185, 129, 0.2); text-align: center;">
+                <div style="color: #10b981; font-size: 2rem; font-weight: 800; margin-bottom: 0.3rem;">100%</div>
+                <div style="color: #94a3b8; font-size: 0.8rem;">Compliance Score</div>
+                <div style="color: #10b981; font-size: 0.7rem; margin-top: 0.3rem;">Perfect rating</div>
+            </div>
+            
+            <div style="background: #1e293b; border-radius: 12px; padding: 1.5rem; border: 1px solid rgba(139, 92, 246, 0.2); text-align: center;">
+                <div style="color: #8b5cf6; font-size: 2rem; font-weight: 800; margin-bottom: 0.3rem;">14.2K</div>
+                <div style="color: #94a3b8; font-size: 0.8rem;">Engines Monitored</div>
+                <div style="color: #8b5cf6; font-size: 0.7rem; margin-top: 0.3rem;">Global coverage</div>
+            </div>
+        </div>
+
+        <!-- Executive Risk Assessment -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+            <div style="background: #1a1f2e; border-radius: 16px; padding: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3 style="color: #e2e8f0; margin: 0;">🎯 Strategic Safety Risk Portfolio</h3>
+                    <div style="background: #22c55e; color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">
+                        LOW RISK
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="font-weight: bold;">Critical Component Failures</span>
+                        <span style="color: #10b981;">0.02% (Target: <0.1%)</span>
+                    </div>
+                    <div style="width: 100%; height: 8px; background: #374151; border-radius: 4px;">
+                        <div style="width: 2%; height: 100%; background: linear-gradient(90deg, #10b981, #059669); border-radius: 4px;"></div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="font-weight: bold;">Unscheduled Maintenance Events</span>
+                        <span style="color: #f59e0b;">5.6% (Target: <8%)</span>
+                    </div>
+                    <div style="width: 100%; height: 8px; background: #374151; border-radius: 4px;">
+                        <div style="width: 56%; height: 100%; background: linear-gradient(90deg, #f59e0b, #d97706); border-radius: 4px;"></div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="font-weight: bold;">Fleet Availability</span>
+                        <span style="color: #10b981;">99.7% (Target: >99%)</span>
+                    </div>
+                    <div style="width: 100%; height: 8px; background: #374151; border-radius: 4px;">
+                        <div style="width: 99.7%; height: 100%; background: linear-gradient(90deg, #10b981, #059669); border-radius: 4px;"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="font-weight: bold;">Regulatory Compliance Score</span>
+                        <span style="color: #10b981;">100% (Target: 100%)</span>
+                    </div>
+                    <div style="width: 100%; height: 8px; background: #374151; border-radius: 4px;">
+                        <div style="width: 100%; height: 100%; background: linear-gradient(90deg, #10b981, #059669); border-radius: 4px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: #1a1f2e; border-radius: 16px; padding: 2rem;">
+                <h3 style="color: #e2e8f0; margin-bottom: 1.5rem;">⚡ Immediate Actions</h3>
+                
+                <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                    <div style="color: #ef4444; font-weight: bold; margin-bottom: 0.5rem;">🔴 HIGH PRIORITY</div>
+                    <div style="font-size: 0.9rem; margin-bottom: 0.5rem;">Flight AA2847: Turbine blade fatigue</div>
+                    <div style="font-size: 0.8rem; opacity: 0.8; margin-bottom: 0.8rem;">Risk: $2.3M • Action: Maintenance scheduled</div>
+                    <button style="background: #ef4444; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">View Details</button>
+                </div>
+
+                <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid #f59e0b; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                    <div style="color: #f59e0b; font-weight: bold; margin-bottom: 0.5rem;">🟡 MEDIUM PRIORITY</div>
+                    <div style="font-size: 0.9rem; margin-bottom: 0.5rem;">2 Fleet Advisories</div>
+                    <div style="font-size: 0.8rem; opacity: 0.8; margin-bottom: 0.8rem;">Preventive maintenance queue</div>
+                    <button style="background: #f59e0b; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">Schedule</button>
+                </div>
+
+                <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid #22c55e; border-radius: 8px; padding: 1rem;">
+                    <div style="color: #22c55e; font-weight: bold; margin-bottom: 0.5rem;">🟢 OPTIMIZATIONS</div>
+                    <div style="font-size: 0.9rem; margin-bottom: 0.5rem;">847 Proactive Interventions</div>
+                    <div style="font-size: 0.8rem; opacity: 0.8; margin-bottom: 0.8rem;">AI-powered safety improvements</div>
+                    <button style="background: #22c55e; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">Review</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Claude Code AI Safety Intelligence -->
+        <div style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border-radius: 16px; padding: 2rem; margin-bottom: 2rem; border: 2px solid #3b82f6;">
+            <div style="display: flex; align-items: center; margin-bottom: 1.5rem;">
+                <div style="background: #3b82f6; color: white; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.5rem; margin-right: 1rem;">C</div>
+                <div>
+                    <h3 style="color: #3b82f6; margin: 0;">Claude Code Safety Intelligence</h3>
+                    <div style="color: #94a3b8; font-size: 0.9rem;">AI-powered predictive safety insights for executive decision-making</div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div>
+                    <h4 style="color: #e2e8f0; margin-bottom: 1rem;">🔍 Key Safety Insights</h4>
+                    <div style="background: rgba(59, 130, 246, 0.1); border-left: 4px solid #3b82f6; padding: 1rem; margin-bottom: 1rem;">
+                        <div style="font-weight: bold; margin-bottom: 0.5rem;">Predictive Maintenance Impact</div>
+                        <div style="font-size: 0.9rem; opacity: 0.9;">Claude Code's predictive algorithms have identified 847 potential failures before they occurred, preventing $47M in safety incidents and improving fleet reliability by 34%.</div>
+                    </div>
+                    <div style="background: rgba(34, 197, 94, 0.1); border-left: 4px solid #22c55e; padding: 1rem;">
+                        <div style="font-weight: bold; margin-bottom: 0.5rem;">Safety Culture Enhancement</div>
+                        <div style="font-size: 0.9rem; opacity: 0.9;">Real-time safety monitoring has increased safety reporting by 67% and reduced safety incidents to zero over the past 30 days, establishing GE Aerospace as the industry safety leader.</div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 style="color: #e2e8f0; margin-bottom: 1rem;">📈 Strategic Recommendations</h4>
+                    <div style="background: rgba(139, 92, 246, 0.1); border-left: 4px solid #8b5cf6; padding: 1rem; margin-bottom: 1rem;">
+                        <div style="font-weight: bold; margin-bottom: 0.5rem;">Expand AI Safety Program</div>
+                        <div style="font-size: 0.9rem; opacity: 0.9;">Scale Claude Code implementation across all 14,247 engines to achieve projected 18% reduction in safety incidents and $127M in additional risk mitigation value.</div>
+                    </div>
+                    <div style="background: rgba(245, 158, 11, 0.1); border-left: 4px solid #f59e0b; padding: 1rem;">
+                        <div style="font-weight: bold; margin-bottom: 0.5rem;">Leadership Communication</div>
+                        <div style="font-size: 0.9rem; opacity: 0.9;">Share zero-incident achievement with stakeholders and regulators to reinforce GE Aerospace's safety leadership position and competitive advantage.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Executive Action Center -->
+        <div style="background: #1a1f2e; border-radius: 16px; padding: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h3 style="color: #e2e8f0; margin: 0;">🎯 Executive Action Center</h3>
+                <div style="font-size: 0.9rem; color: #94a3b8;">Last updated: Just now</div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;">
+                <button onclick="alert('🎯 CEO Safety Briefing\n\n✅ Zero incidents - 30 days\n✅ $47M incidents prevented\n✅ 99.98% safety rating\n\nActions:\n• Share with board\n• Highlight Claude Code ROI\n• Plan safety communication')" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; border: none; padding: 1.5rem 1rem; border-radius: 12px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); min-height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(59, 130, 246, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(59, 130, 246, 0.3)'">
+                    <div style="font-size: 1.8rem; margin-bottom: 0.5rem;">📊</div>
+                    <div style="font-weight: 700; margin-bottom: 0.3rem; font-size: 1rem; line-height: 1.2;">CEO Safety Briefing</div>
+                    <div style="font-size: 0.75rem; opacity: 0.9; line-height: 1.3;">Generate executive summary</div>
+                </button>
+                
+                <button onclick="alert('📢 Safety Communication\n\n✅ Broadcasting to 14,247 engines\n✅ Real-time safety status\n✅ Zero incident achievement\n\nIncludes:\n• Safety milestone celebration\n• Continued vigilance message\n• Team recognition')" style="background: linear-gradient(135deg, #22c55e, #15803d); color: white; border: none; padding: 1.5rem 1rem; border-radius: 12px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3); min-height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(34, 197, 94, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(34, 197, 94, 0.3)'">
+                    <div style="font-size: 1.8rem; margin-bottom: 0.5rem;">📢</div>
+                    <div style="font-weight: 700; margin-bottom: 0.3rem; font-size: 1rem; line-height: 1.2;">Safety Communication</div>
+                    <div style="font-size: 0.75rem; opacity: 0.9; line-height: 1.3;">Broadcast to all operations</div>
+                </button>
+                
+                <button onclick="alert('📋 Board Report\n\n✅ Automated metrics compilation\n✅ Executive summary\n✅ Industry comparisons\n\nPresentation includes:\n• 99.98% safety rating\n• $47M risk mitigation\n• Claude Code ROI\n• Leadership position')" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; border: none; padding: 1.5rem 1rem; border-radius: 12px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3); min-height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(139, 92, 246, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(139, 92, 246, 0.3)'">
+                    <div style="font-size: 1.8rem; margin-bottom: 0.5rem;">📋</div>
+                    <div style="font-weight: 700; margin-bottom: 0.3rem; font-size: 1rem; line-height: 1.2;">Board Report</div>
+                    <div style="font-size: 0.75rem; opacity: 0.9; line-height: 1.3;">Generate safety metrics</div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Engine Detail Modal -->
+    <div id="engine-detail-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.8); z-index: 1000; overflow-y: auto;">
+        <div style="max-width: 1200px; margin: 2rem auto; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: 16px; padding: 0; position: relative; border: 1px solid #334155;">
+            <!-- Modal Header -->
+            <div style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); padding: 2rem; border-radius: 16px 16px 0 0; border-bottom: 1px solid #334155;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h2 style="color: white; margin: 0 0 0.5rem 0; font-size: 1.8rem; font-weight: 700;">🔧 Engine #2 - CFM LEAP-1B Diagnostics</h2>
+                        <div style="color: rgba(255,255,255,0.9); font-size: 1rem;">Flight AA2847 • Boeing 737 MAX • Real-time Component Analysis</div>
+                    </div>
+                    <button onclick="closeEngineDetails()" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-size: 1.2rem; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">✕</button>
+                </div>
+            </div>
+
+            <div style="padding: 2rem; max-height: 80vh; overflow-y: auto;">
+                <!-- Engine Status Overview -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                    <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 12px; padding: 1.5rem; text-align: center;">
+                        <div style="color: #ef4444; font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem;">CRITICAL</div>
+                        <div style="color: #e2e8f0; font-size: 0.9rem;">Overall Status</div>
+                        <div style="color: #ef4444; font-size: 0.8rem; margin-top: 0.5rem;">Immediate Attention Required</div>
+                    </div>
+                    <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid #3b82f6; border-radius: 12px; padding: 1.5rem; text-align: center;">
+                        <div style="color: #3b82f6; font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem;">67H</div>
+                        <div style="color: #e2e8f0; font-size: 0.9rem;">Maintenance Window</div>
+                        <div style="color: #3b82f6; font-size: 0.8rem; margin-top: 0.5rem;">Before required landing</div>
+                    </div>
+                    <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid #f59e0b; border-radius: 12px; padding: 1.5rem; text-align: center;">
+                        <div style="color: #f59e0b; font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem;">$2.3M</div>
+                        <div style="color: #e2e8f0; font-size: 0.9rem;">Risk Value</div>
+                        <div style="color: #f59e0b; font-size: 0.8rem; margin-top: 0.5rem;">If failure occurs</div>
+                    </div>
+                </div>
+
+                <!-- Component Analysis -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                    <div style="background: #1e293b; border-radius: 12px; padding: 2rem; border: 1px solid #334155;">
+                        <h3 style="color: #e2e8f0; margin: 0 0 1.5rem 0; font-size: 1.4rem;">🌡️ Component Health Analysis</h3>
+                        
+                        <div style="margin-bottom: 1.5rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                <span style="color: #e2e8f0; font-weight: 600;">High-Pressure Turbine</span>
+                                <span style="background: #ef4444; color: white; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.7rem; font-weight: bold;">CRITICAL</span>
+                            </div>
+                            <div style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 0.5rem;">Temperature: 1,847°F (Max: 1,800°F)</div>
+                            <div style="background: #374151; border-radius: 8px; height: 8px; overflow: hidden;">
+                                <div style="background: linear-gradient(90deg, #ef4444, #dc2626); height: 100%; width: 98%; border-radius: 8px;"></div>
+                            </div>
+                            <div style="color: #ef4444; font-size: 0.8rem; margin-top: 0.3rem;">⚠️ Blade fatigue detected - Metal stress analysis shows micro-fractures</div>
+                        </div>
+
+                        <div style="margin-bottom: 1.5rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                <span style="color: #e2e8f0; font-weight: 600;">Combustor</span>
+                                <span style="background: #ef4444; color: white; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.7rem; font-weight: bold;">CRITICAL</span>
+                            </div>
+                            <div style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 0.5rem;">Pressure: 892 PSI (Normal: 850-900 PSI)</div>
+                            <div style="background: #374151; border-radius: 8px; height: 8px; overflow: hidden;">
+                                <div style="background: linear-gradient(90deg, #ef4444, #dc2626); height: 100%; width: 95%; border-radius: 8px;"></div>
+                            </div>
+                            <div style="color: #ef4444; font-size: 0.8rem; margin-top: 0.3rem;">⚠️ Combustion instability - Flame pattern irregularities detected</div>
+                        </div>
+
+                        <div style="margin-bottom: 1.5rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                <span style="color: #e2e8f0; font-weight: 600;">Oil System</span>
+                                <span style="background: #f59e0b; color: white; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.7rem; font-weight: bold;">MONITORING</span>
+                            </div>
+                            <div style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 0.5rem;">Pressure: 42.3 PSI (Normal: 40-60 PSI)</div>
+                            <div style="background: #374151; border-radius: 8px; height: 8px; overflow: hidden;">
+                                <div style="background: linear-gradient(90deg, #f59e0b, #d97706); height: 100%; width: 72%; border-radius: 8px;"></div>
+                            </div>
+                            <div style="color: #f59e0b; font-size: 0.8rem; margin-top: 0.3rem;">ℹ️ Filter efficiency declining - Schedule replacement within 200 hours</div>
+                        </div>
+
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                <span style="color: #e2e8f0; font-weight: 600;">Fan Assembly</span>
+                                <span style="background: #22c55e; color: white; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.7rem; font-weight: bold;">OPTIMAL</span>
+                            </div>
+                            <div style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 0.5rem;">RPM: 4,250 (Target: 4,200-4,300)</div>
+                            <div style="background: #374151; border-radius: 8px; height: 8px; overflow: hidden;">
+                                <div style="background: linear-gradient(90deg, #22c55e, #16a34a); height: 100%; width: 85%; border-radius: 8px;"></div>
+                            </div>
+                            <div style="color: #22c55e; font-size: 0.8rem; margin-top: 0.3rem;">✅ Operating within optimal parameters - No action required</div>
+                        </div>
+                    </div>
+
+                    <div style="background: #1e293b; border-radius: 12px; padding: 2rem; border: 1px solid #334155;">
+                        <h3 style="color: #e2e8f0; margin: 0 0 1.5rem 0; font-size: 1.4rem;">📊 Performance Trends</h3>
+                        
+                        <!-- Predictive Analysis -->
+                        <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid #3b82f6; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                            <h4 style="color: #3b82f6; margin: 0 0 1rem 0; font-size: 1.1rem;">🤖 AI Predictive Analysis</h4>
+                            <div style="color: #e2e8f0; font-size: 0.9rem; margin-bottom: 0.8rem;">
+                                <strong>Failure Probability:</strong> 85% within next 72 hours if not addressed
+                            </div>
+                            <div style="color: #e2e8f0; font-size: 0.9rem; margin-bottom: 0.8rem;">
+                                <strong>Root Cause:</strong> Extended high-temperature operation above design limits
+                            </div>
+                            <div style="color: #e2e8f0; font-size: 0.9rem;">
+                                <strong>Recommendation:</strong> Immediate engine shutdown and blade inspection required
+                            </div>
+                        </div>
+
+                        <!-- Maintenance History -->
+                        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; border-radius: 12px; padding: 1.5rem;">
+                            <h4 style="color: #10b981; margin: 0 0 1rem 0; font-size: 1.1rem;">🔧 Recent Maintenance</h4>
+                            <div style="space-y: 0.5rem;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span style="color: #e2e8f0; font-size: 0.9rem;">Aug 15, 2025 - Scheduled Inspection</span>
+                                    <span style="color: #10b981; font-size: 0.8rem;">✅ Completed</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span style="color: #e2e8f0; font-size: 0.9rem;">Jul 22, 2025 - Oil Change</span>
+                                    <span style="color: #10b981; font-size: 0.8rem;">✅ Completed</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span style="color: #e2e8f0; font-size: 0.9rem;">Jun 30, 2025 - Borescope Inspection</span>
+                                    <span style="color: #10b981; font-size: 0.8rem;">✅ Completed</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: #e2e8f0; font-size: 0.9rem;">Jun 10, 2025 - Fan Blade Replacement</span>
+                                    <span style="color: #10b981; font-size: 0.8rem;">✅ Completed</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Recommendations -->
+                <div style="background: rgba(239, 68, 68, 0.1); border: 2px solid #ef4444; border-radius: 12px; padding: 2rem;">
+                    <h3 style="color: #ef4444; margin: 0 0 1.5rem 0; font-size: 1.4rem;">⚠️ Immediate Action Required</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                        <div>
+                            <h4 style="color: #e2e8f0; margin: 0 0 1rem 0;">Recommended Actions:</h4>
+                            <ul style="color: #e2e8f0; font-size: 0.9rem; margin: 0; padding-left: 1.5rem;">
+                                <li style="margin-bottom: 0.5rem;">Initiate controlled engine shutdown at next suitable airport</li>
+                                <li style="margin-bottom: 0.5rem;">Schedule immediate turbine blade inspection and replacement</li>
+                                <li style="margin-bottom: 0.5rem;">Conduct full combustor system analysis</li>
+                                <li style="margin-bottom: 0.5rem;">Replace oil filter and conduct system flush</li>
+                                <li>Document all findings for regulatory compliance</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 style="color: #e2e8f0; margin: 0 0 1rem 0;">Cost Analysis:</h4>
+                            <div style="color: #e2e8f0; font-size: 0.9rem;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span>Preventive Maintenance:</span>
+                                    <span style="color: #22c55e;">$45,000</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span>Emergency Replacement:</span>
+                                    <span style="color: #ef4444;">$2.3M</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span>Flight Delays/Cancellations:</span>
+                                    <span style="color: #f59e0b;">$180K</span>
+                                </div>
+                                <hr style="border: 1px solid #374151; margin: 1rem 0;">
+                                <div style="display: flex; justify-content: space-between; font-weight: bold;">
+                                    <span>Total Savings:</span>
+                                    <span style="color: #22c55e;">$2.435M</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="development-stats">
+        <div style="text-align: center;">
+            <div style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 0.5rem;">Built with</div>
+            <div class="claude-badge">Claude Code</div>
+            <div style="font-size: 0.8rem; opacity: 0.8; margin-top: 0.5rem;">Aviation-grade AI development</div>
+        </div>
+    </div>
+
+    <script>
+        let simulationRunning = false;
+
+        // Initialize engine grid
+        function initializeEngineGrid() {
+            const grid = document.getElementById('engine-grid');
+            grid.innerHTML = '';
+            
+            for (let i = 0; i < 500; i++) {
+                const dot = document.createElement('div');
+                const rand = Math.random();
+                let color = '#10b981'; // Green - optimal
+                
+                if (rand > 0.942) {
+                    color = '#ef4444'; // Red - critical
+                } else if (rand > 0.886) {
+                    color = '#f59e0b'; // Yellow - advisory
+                }
+                
+                dot.style.cssText = `
+                    width: 8px;
+                    height: 8px;
+                    border-radius: 50%;
+                    background: ${color};
+                    transition: all 0.3s ease;
+                    cursor: pointer;
+                `;
+                
+                dot.addEventListener('mouseenter', () => {
+                    dot.style.transform = 'scale(1.5)';
+                    dot.style.boxShadow = `0 0 10px ${color}`;
+                });
+                
+                dot.addEventListener('mouseleave', () => {
+                    dot.style.transform = 'scale(1)';
+                    dot.style.boxShadow = 'none';
+                });
+                
+                grid.appendChild(dot);
+            }
+        }
+
+        function toggleFleetView() {
+            const summary = document.getElementById('fleet-summary');
+            const detailed = document.getElementById('fleet-detailed');
+            const toggle = document.getElementById('fleet-toggle');
+            
+            if (summary.style.display === 'none') {
+                summary.style.display = 'block';
+                detailed.style.display = 'none';
+                toggle.textContent = '📊 Detailed View';
+            } else {
+                summary.style.display = 'none';
+                detailed.style.display = 'block';
+                toggle.textContent = '📋 Summary View';
+                
+                // Generate detailed fleet analytics dashboard
+                detailed.innerHTML = `
+                    <div style="background: #0f1419; border-radius: 12px; padding: 1.5rem; border: 1px solid #374151;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                            <h4 style="color: #3b82f6; margin: 0;">🌐 Global Fleet Analytics Dashboard</h4>
+                            <button class="control-button" onclick="toggleFleetView()">📋 Return to Summary</button>
+                        </div>
+                        
+                        <!-- Fleet Performance Metrics -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                            <div style="background: #1a1f2e; padding: 1.5rem; border-radius: 8px; border-left: 3px solid #10b981; text-align: center;">
+                                <div style="font-size: 2rem; font-weight: bold; color: #10b981; margin-bottom: 0.5rem;">14,247</div>
+                                <div style="font-size: 0.9rem; opacity: 0.8;">Total Engines</div>
+                                <div style="font-size: 0.75rem; color: #10b981; margin-top: 0.25rem;">+47 This Week</div>
+                            </div>
+                            <div style="background: #1a1f2e; padding: 1.5rem; border-radius: 8px; border-left: 3px solid #10b981; text-align: center;">
+                                <div style="font-size: 2rem; font-weight: bold; color: #10b981; margin-bottom: 0.5rem;">13,426</div>
+                                <div style="font-size: 0.9rem; opacity: 0.8;">Optimal Status</div>
+                                <div style="font-size: 0.75rem; color: #10b981; margin-top: 0.25rem;">94.2% of Fleet</div>
+                            </div>
+                            <div style="background: #1a1f2e; padding: 1.5rem; border-radius: 8px; border-left: 3px solid #f59e0b; text-align: center;">
+                                <div style="font-size: 2rem; font-weight: bold; color: #f59e0b; margin-bottom: 0.5rem;">798</div>
+                                <div style="font-size: 0.9rem; opacity: 0.8;">Advisory Alerts</div>
+                                <div style="font-size: 0.75rem; color: #f59e0b; margin-top: 0.25rem;">5.6% of Fleet</div>
+                            </div>
+                            <div style="background: #1a1f2e; padding: 1.5rem; border-radius: 8px; border-left: 3px solid #ef4444; text-align: center;">
+                                <div style="font-size: 2rem; font-weight: bold; color: #ef4444; margin-bottom: 0.5rem;">23</div>
+                                <div style="font-size: 0.9rem; opacity: 0.8;">Critical Issues</div>
+                                <div style="font-size: 0.75rem; color: #ef4444; margin-top: 0.25rem;">0.2% of Fleet</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Aircraft Type Breakdown -->
+                        <div style="background: #1a1f2e; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; border: 1px solid #374151;">
+                            <h5 style="color: #3b82f6; margin-bottom: 1rem;">📊 Fleet Composition by Aircraft Type</h5>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                        <span style="color: white; font-weight: 600;">Boeing 737 MAX</span>
+                                        <span style="color: #10b981; font-weight: bold;">4,247 engines</span>
+                                    </div>
+                                    <div style="width: 100%; height: 8px; background: #374151; border-radius: 4px; overflow: hidden; margin-bottom: 0.25rem;">
+                                        <div style="width: 30%; height: 100%; background: linear-gradient(90deg, #10b981, #059669);"></div>
+                                    </div>
+                                    <div style="font-size: 0.75rem; opacity: 0.7;">99.8% Availability • 12 Advisory</div>
+                                </div>
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                        <span style="color: white; font-weight: 600;">Boeing 777</span>
+                                        <span style="color: #10b981; font-weight: bold;">3,156 engines</span>
+                                    </div>
+                                    <div style="width: 100%; height: 8px; background: #374151; border-radius: 4px; overflow: hidden; margin-bottom: 0.25rem;">
+                                        <div style="width: 22%; height: 100%; background: linear-gradient(90deg, #3b82f6, #1d4ed8);"></div>
+                                    </div>
+                                    <div style="font-size: 0.75rem; opacity: 0.7;">99.1% Availability • 28 Advisory</div>
+                                </div>
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                        <span style="color: white; font-weight: 600;">Boeing 787</span>
+                                        <span style="color: #f59e0b; font-weight: bold;">2,834 engines</span>
+                                    </div>
+                                    <div style="width: 100%; height: 8px; background: #374151; border-radius: 4px; overflow: hidden; margin-bottom: 0.25rem;">
+                                        <div style="width: 20%; height: 100%; background: linear-gradient(90deg, #f59e0b, #d97706);"></div>
+                                    </div>
+                                    <div style="font-size: 0.75rem; opacity: 0.7;">96.8% Availability • 89 Advisory • 1 Critical</div>
+                                </div>
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                        <span style="color: white; font-weight: 600;">Airbus A320 Family</span>
+                                        <span style="color: #10b981; font-weight: bold;">2,467 engines</span>
+                                    </div>
+                                    <div style="width: 100%; height: 8px; background: #374151; border-radius: 4px; overflow: hidden; margin-bottom: 0.25rem;">
+                                        <div style="width: 17%; height: 100%; background: linear-gradient(90deg, #0ea5e9, #0284c7);"></div>
+                                    </div>
+                                    <div style="font-size: 0.75rem; opacity: 0.7;">98.9% Availability • 34 Advisory</div>
+                                </div>
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                        <span style="color: white; font-weight: 600;">Boeing 757/767</span>
+                                        <span style="color: #ef4444; font-weight: bold;">1,543 engines</span>
+                                    </div>
+                                    <div style="width: 100%; height: 8px; background: #374151; border-radius: 4px; overflow: hidden; margin-bottom: 0.25rem;">
+                                        <div style="width: 11%; height: 100%; background: linear-gradient(90deg, #ef4444, #dc2626);"></div>
+                                    </div>
+                                    <div style="font-size: 0.75rem; opacity: 0.7;">92.1% Availability • 145 Advisory • 22 Critical</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Real-time Alerts Table -->
+                        <div style="background: #1a1f2e; padding: 1.5rem; border-radius: 8px; border: 1px solid #374151;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                <h5 style="color: #3b82f6; margin: 0;">⚡ Real-time Fleet Alerts</h5>
+                                <div style="font-size: 0.8rem; opacity: 0.7;">Last updated: ${new Date().toLocaleTimeString()}</div>
+                            </div>
+                            <div style="overflow-x: auto;">
+                                <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                                    <thead>
+                                        <tr style="border-bottom: 1px solid #374151;">
+                                            <th style="text-align: left; padding: 0.75rem; color: #9ca3af; font-weight: 600;">Flight</th>
+                                            <th style="text-align: left; padding: 0.75rem; color: #9ca3af; font-weight: 600;">Aircraft</th>
+                                            <th style="text-align: left; padding: 0.75rem; color: #9ca3af; font-weight: 600;">Engine</th>
+                                            <th style="text-align: left; padding: 0.75rem; color: #9ca3af; font-weight: 600;">Alert</th>
+                                            <th style="text-align: left; padding: 0.75rem; color: #9ca3af; font-weight: 600;">Severity</th>
+                                            <th style="text-align: right; padding: 0.75rem; color: #9ca3af; font-weight: 600;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr style="border-bottom: 1px solid #374151; cursor: pointer;" onclick="drillDownToEngine('AA2847', 'critical')" onmouseover="this.style.background='#374151'" onmouseout="this.style.background='transparent'">
+                                            <td style="padding: 0.75rem; color: white; font-weight: 600;">AA2847</td>
+                                            <td style="padding: 0.75rem; color: #9ca3af;">Boeing 737 MAX</td>
+                                            <td style="padding: 0.75rem; color: #9ca3af;">CFM LEAP-1B #2</td>
+                                            <td style="padding: 0.75rem; color: white;">Turbine blade fatigue</td>
+                                            <td style="padding: 0.75rem;"><span style="background: #ef4444; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">CRITICAL</span></td>
+                                            <td style="padding: 0.75rem; text-align: right;"><button onclick="event.stopPropagation(); drillDownToEngine('AA2847', 'critical')" style="background: #ef4444; color: white; border: none; padding: 4px 12px; border-radius: 6px; cursor: pointer; font-size: 0.75rem;">View Details</button></td>
+                                        </tr>
+                                        <tr style="border-bottom: 1px solid #374151; cursor: pointer;" onclick="drillDownToEngine('DL4532', 'advisory')" onmouseover="this.style.background='#374151'" onmouseout="this.style.background='transparent'">
+                                            <td style="padding: 0.75rem; color: white; font-weight: 600;">DL4532</td>
+                                            <td style="padding: 0.75rem; color: #9ca3af;">Boeing 757-200</td>
+                                            <td style="padding: 0.75rem; color: #9ca3af;">PW2037 #1</td>
+                                            <td style="padding: 0.75rem; color: white;">Oil filter efficiency low</td>
+                                            <td style="padding: 0.75rem;"><span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">ADVISORY</span></td>
+                                            <td style="padding: 0.75rem; text-align: right;"><button onclick="event.stopPropagation(); drillDownToEngine('DL4532', 'advisory')" style="background: #f59e0b; color: white; border: none; padding: 4px 12px; border-radius: 6px; cursor: pointer; font-size: 0.75rem;">View Details</button></td>
+                                        </tr>
+                                        <tr style="border-bottom: 1px solid #374151; cursor: pointer;" onclick="drillDownToEngine('UA8721', 'advisory')" onmouseover="this.style.background='#374151'" onmouseout="this.style.background='transparent'">
+                                            <td style="padding: 0.75rem; color: white; font-weight: 600;">UA8721</td>
+                                            <td style="padding: 0.75rem; color: #9ca3af;">Boeing 777-200ER</td>
+                                            <td style="padding: 0.75rem; color: #9ca3af;">GE90-85B #2</td>
+                                            <td style="padding: 0.75rem; color: white;">Fuel nozzle performance</td>
+                                            <td style="padding: 0.75rem;"><span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">ADVISORY</span></td>
+                                            <td style="padding: 0.75rem; text-align: right;"><button onclick="event.stopPropagation(); drillDownToEngine('UA8721', 'advisory')" style="background: #f59e0b; color: white; border: none; padding: 4px 12px; border-radius: 6px; cursor: pointer; font-size: 0.75rem;">View Details</button></td>
+                                        </tr>
+                                        <tr style="border-bottom: 1px solid #374151; cursor: pointer;" onmouseover="this.style.background='#374151'" onmouseout="this.style.background='transparent'">
+                                            <td style="padding: 0.75rem; color: white; font-weight: 600;">LH8934</td>
+                                            <td style="padding: 0.75rem; color: #9ca3af;">Airbus A330-300</td>
+                                            <td style="padding: 0.75rem; color: #9ca3af;">CF6-80E1 #1</td>
+                                            <td style="padding: 0.75rem; color: white;">Temperature trending high</td>
+                                            <td style="padding: 0.75rem;"><span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">ADVISORY</span></td>
+                                            <td style="padding: 0.75rem; text-align: right;"><button style="background: #f59e0b; color: white; border: none; padding: 4px 12px; border-radius: 6px; cursor: pointer; font-size: 0.75rem;">View Details</button></td>
+                                        </tr>
+                                        <tr style="cursor: pointer;" onmouseover="this.style.background='#374151'" onmouseout="this.style.background='transparent'">
+                                            <td style="padding: 0.75rem; color: white; font-weight: 600;">BA4821</td>
+                                            <td style="padding: 0.75rem; color: #9ca3af;">Boeing 787-9</td>
+                                            <td style="padding: 0.75rem; color: #9ca3af;">GEnx-1B #2</td>
+                                            <td style="padding: 0.75rem; color: white;">Scheduled maintenance due</td>
+                                            <td style="padding: 0.75rem;"><span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">SCHEDULED</span></td>
+                                            <td style="padding: 0.75rem; text-align: right;"><button style="background: #10b981; color: white; border: none; padding: 4px 12px; border-radius: 6px; cursor: pointer; font-size: 0.75rem;">View Details</button></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Cost Impact Summary -->
+                        <div style="background: linear-gradient(135deg, #059669, #047857); color: white; padding: 1.5rem; border-radius: 8px; margin-top: 2rem; text-align: center;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem;">
+                                <div>
+                                    <div style="font-size: 2rem; font-weight: bold; margin-bottom: 0.25rem;">$47.8M</div>
+                                    <div style="font-size: 0.9rem; opacity: 0.9;">Costs Avoided This Month</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 2rem; font-weight: bold; margin-bottom: 0.25rem;">99.7%</div>
+                                    <div style="font-size: 0.9rem; opacity: 0.9;">Fleet Availability Rate</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 2rem; font-weight: bold; margin-bottom: 0.25rem;">4.2hrs</div>
+                                    <div style="font-size: 0.9rem; opacity: 0.9;">Average Prediction Lead Time</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 2rem; font-weight: bold; margin-bottom: 0.25rem;">87%</div>
+                                    <div style="font-size: 0.9rem; opacity: 0.9;">Prediction Accuracy Rate</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function switchMainTab(tab) {
+            const monitoringDash = document.getElementById('monitoring-dashboard');
+            const executiveDash = document.getElementById('executive-dashboard');
+            const monitoringTab = document.getElementById('monitoring-tab');
+            const executiveTab = document.getElementById('executive-tab');
+            
+            if (tab === 'monitoring') {
+                monitoringDash.style.display = 'grid';
+                executiveDash.style.display = 'none';
+                monitoringTab.style.background = '#3b82f6';
+                executiveTab.style.background = '#374151';
+            } else {
+                monitoringDash.style.display = 'none';
+                executiveDash.style.display = 'grid';
+                monitoringTab.style.background = '#374151';
+                executiveTab.style.background = '#3b82f6';
+            }
+        }
+
+        function simulateScenario(type) {
+            if (simulationRunning) return;
+            
+            simulationRunning = true;
+            const tempGauge = document.getElementById('temp-gauge');
+            const pressureGauge = document.getElementById('pressure-gauge');
+            const vibrationGauge = document.getElementById('vibration-gauge');
+            const rpmGauge = document.getElementById('rpm-gauge');
+            
+            if (type === 'stress') {
+                // Simulate stress test
+                let temp = 1847;
+                let pressure = 42.3;
+                let vibration = 3.2;
+                let rpm = 4250;
+                
+                const interval = setInterval(() => {
+                    temp += Math.random() * 20 - 10;
+                    pressure += Math.random() * 2 - 1;
+                    vibration += Math.random() * 0.4 - 0.2;
+                    rpm += Math.random() * 50 - 25;
+                    
+                    tempGauge.textContent = Math.round(temp) + '°F';
+                    pressureGauge.textContent = pressure.toFixed(1);
+                    vibrationGauge.textContent = vibration.toFixed(1);
+                    rpmGauge.textContent = Math.round(rpm);
+                    
+                    if (temp > 1900) {
+                        tempGauge.className = 'metric-value';
+                    } else if (temp > 1850) {
+                        tempGauge.className = 'metric-value metric-warning';
+                    } else {
+                        tempGauge.className = 'metric-value metric-normal';
+                    }
+                }, 1000);
+                
+                setTimeout(() => {
+                    clearInterval(interval);
+                    simulationRunning = false;
+                }, 10000);
+            } else {
+                // Normal flight simulation
+                setTimeout(() => {
+                    tempGauge.textContent = '1,823°F';
+                    tempGauge.className = 'metric-value metric-normal';
+                    simulationRunning = false;
+                }, 2000);
+            }
+        }
+
+        // Engine data database
+        const engineDatabase = {
+            'AA2847': {
+                flight: 'AA2847',
+                aircraft: 'Boeing 737 MAX 8',
+                engine: 'CFM LEAP-1B27',
+                serialNumber: 'CFM-847392',
+                position: 'Engine #2 (Right)',
+                currentAltitude: '35,000 ft',
+                flightTime: '4.2 hours',
+                route: 'DFW → LAX',
+                severity: 'critical',
+                alert: 'High-pressure turbine blade fatigue detected',
+                maintenanceWindow: '67 hours',
+                riskValue: '$2.3M',
+                metrics: {
+                    temperature: { value: 1847, unit: '°F', status: 'critical', trend: 'increasing' },
+                    pressure: { value: 42.3, unit: 'PSI', status: 'normal', trend: 'stable' },
+                    vibration: { value: 3.2, unit: 'G', status: 'elevated', trend: 'increasing' },
+                    rpm: { value: 4250, unit: 'RPM', status: 'optimal', trend: 'stable' },
+                    fuelFlow: { value: 2847, unit: 'lb/hr', status: 'normal', trend: 'stable' },
+                    oilTemp: { value: 185, unit: '°F', status: 'normal', trend: 'stable' }
+                },
+                maintenanceHistory: [
+                    { date: '2025-08-15', type: 'Scheduled Inspection', technician: 'M. Rodriguez', status: 'Completed' },
+                    { date: '2025-07-22', type: 'Oil Change', technician: 'J. Chen', status: 'Completed' },
+                    { date: '2025-06-30', type: 'Borescope Inspection', technician: 'D. Williams', status: 'Completed' },
+                    { date: '2025-06-10', type: 'Fan Blade Replacement', technician: 'A. Johnson', status: 'Completed' }
+                ],
+                predictiveAnalytics: {
+                    failureProbability: 85,
+                    recommendedAction: 'Immediate maintenance required within 72 hours',
+                    costImpact: {
+                        preventive: '$45,000',
+                        emergency: '$2.3M',
+                        savings: '$2.25M'
+                    },
+                    similarCases: 23,
+                    fleetImpact: '0.2% of global fleet requires attention'
+                }
+            },
+            'DL4532': {
+                flight: 'DL4532',
+                aircraft: 'Boeing 757-200',
+                engine: 'Pratt & Whitney PW2037',
+                serialNumber: 'PW-542871',
+                position: 'Engine #1 (Left)',
+                currentAltitude: '28,000 ft',
+                flightTime: '2.8 hours',
+                route: 'ATL → JFK',
+                severity: 'advisory',
+                alert: 'Oil filter efficiency declining',
+                maintenanceWindow: '240 hours',
+                riskValue: '$450K',
+                metrics: {
+                    temperature: { value: 1654, unit: '°F', status: 'normal', trend: 'stable' },
+                    pressure: { value: 38.7, unit: 'PSI', status: 'declining', trend: 'decreasing' },
+                    vibration: { value: 2.1, unit: 'G', status: 'normal', trend: 'stable' },
+                    rpm: { value: 3890, unit: 'RPM', status: 'optimal', trend: 'stable' },
+                    fuelFlow: { value: 2234, unit: 'lb/hr', status: 'normal', trend: 'stable' },
+                    oilTemp: { value: 165, unit: '°F', status: 'elevated', trend: 'increasing' }
+                },
+                maintenanceHistory: [
+                    { date: '2025-08-20', type: 'Filter Inspection', technician: 'K. Patel', status: 'Completed' },
+                    { date: '2025-07-15', type: 'Routine Service', technician: 'R. Thompson', status: 'Completed' },
+                    { date: '2025-06-28', type: 'Oil Analysis', technician: 'S. Miller', status: 'Completed' },
+                    { date: '2025-05-12', type: 'Component Replacement', technician: 'L. Garcia', status: 'Completed' }
+                ],
+                predictiveAnalytics: {
+                    failureProbability: 35,
+                    recommendedAction: 'Schedule preventive maintenance within 2 weeks',
+                    costImpact: {
+                        preventive: '$12,500',
+                        emergency: '$450K',
+                        savings: '$437.5K'
+                    },
+                    similarCases: 47,
+                    fleetImpact: '3.2% of fleet shows similar pattern'
+                }
+            },
+            'UA8721': {
+                flight: 'UA8721',
+                aircraft: 'Boeing 777-200ER',
+                engine: 'General Electric GE90-85B',
+                serialNumber: 'GE90-721843',
+                position: 'Engine #2 (Right)',
+                currentAltitude: 'Ground (JFK)',
+                flightTime: 'Pre-flight',
+                route: 'JFK → SFO',
+                severity: 'advisory',
+                alert: 'Fuel nozzle performance low',
+                maintenanceWindow: '48 hours',
+                riskValue: '$180K',
+                metrics: {
+                    temperature: { value: 72, unit: '°F', status: 'ground', trend: 'stable' },
+                    pressure: { value: 14.7, unit: 'PSI', status: 'ground', trend: 'stable' },
+                    vibration: { value: 0.1, unit: 'G', status: 'ground', trend: 'stable' },
+                    rpm: { value: 0, unit: 'RPM', status: 'shutdown', trend: 'stable' },
+                    fuelFlow: { value: 0, unit: 'lb/hr', status: 'ground', trend: 'stable' },
+                    nozzleEfficiency: { value: 78, unit: '%', status: 'low', trend: 'decreasing' }
+                },
+                maintenanceHistory: [
+                    { date: '2025-09-01', type: 'Pre-flight Inspection', technician: 'T. Anderson', status: 'In Progress' },
+                    { date: '2025-08-28', type: 'Fuel System Check', technician: 'M. Lee', status: 'Completed' },
+                    { date: '2025-08-10', type: 'Nozzle Cleaning', technician: 'D. Brown', status: 'Completed' },
+                    { date: '2025-07-25', type: 'Fuel Filter Replacement', technician: 'J. Wilson', status: 'Completed' }
+                ],
+                predictiveAnalytics: {
+                    failureProbability: 25,
+                    recommendedAction: 'Inspect fuel nozzles before takeoff',
+                    costImpact: {
+                        preventive: '$8,500',
+                        emergency: '$180K',
+                        savings: '$171.5K'
+                    },
+                    similarCases: 12,
+                    fleetImpact: '1.8% of 777 fleet affected'
+                }
+            }
+        };
+        
+        function drillDownToEngine(flight, severity) {
+            const engineData = engineDatabase[flight];
+            if (!engineData) {
+                // If no specific data exists, show a generic engine profile
+                console.log(`Showing generic engine data for flight: ${flight}`);
+                showGenericEngineData(flight, severity);
+                return;
+            }
+            
+            showEngineDetailModal(engineData);
+        }
+        
+        function showGenericEngineData(flight, severity) {
+            const genericData = {
+                flight: flight,
+                aircraft: 'Boeing 777-200ER',
+                engine: 'General Electric CF6-80C2',
+                serialNumber: 'GE-' + Math.floor(Math.random() * 900000 + 100000),
+                position: Math.random() > 0.5 ? 'Engine #1 (Left)' : 'Engine #2 (Right)',
+                currentAltitude: Math.floor(Math.random() * 10000 + 25000) + ' ft',
+                flightTime: (Math.random() * 8 + 1).toFixed(1) + ' hours',
+                route: 'International Route',
+                severity: severity,
+                alert: severity === 'critical' ? 'Component monitoring required' : 'Routine monitoring alert',
+                maintenanceWindow: severity === 'critical' ? '48 hours' : '7 days',
+                riskValue: severity === 'critical' ? '$1.2M' : '$250K',
+                metrics: {
+                    temperature: { value: Math.floor(Math.random() * 200 + 1500), unit: '°F', status: 'normal', trend: 'stable' },
+                    pressure: { value: (Math.random() * 10 + 35).toFixed(1), unit: 'PSI', status: 'normal', trend: 'stable' },
+                    vibration: { value: (Math.random() * 2 + 1).toFixed(1), unit: 'G', status: 'normal', trend: 'stable' },
+                    rpm: { value: Math.floor(Math.random() * 500 + 3500), unit: 'RPM', status: 'optimal', trend: 'stable' }
+                },
+                maintenanceHistory: [
+                    { date: '2025-08-20', type: 'Routine Inspection', technician: 'A. Smith', status: 'Completed' },
+                    { date: '2025-07-15', type: 'Service Check', technician: 'B. Jones', status: 'Completed' }
+                ],
+                predictiveAnalytics: {
+                    failureProbability: severity === 'critical' ? 65 : 25,
+                    recommendedAction: severity === 'critical' ? 'Schedule maintenance within 48 hours' : 'Continue monitoring, schedule preventive maintenance',
+                    costImpact: {
+                        preventive: severity === 'critical' ? '$35,000' : '$15,000',
+                        emergency: severity === 'critical' ? '$1.2M' : '$250K',
+                        savings: severity === 'critical' ? '$1.165M' : '$235K'
+                    },
+                    similarCases: Math.floor(Math.random() * 50 + 10),
+                    fleetImpact: (Math.random() * 3 + 0.5).toFixed(1) + '% of similar aircraft affected'
+                }
+            };
+            
+            showEngineDetailModal(genericData);
+        }
+
+        // Initialize the demo
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeEngineGrid();
+            
+            // Auto-refresh some metrics
+            setInterval(() => {
+                const metrics = document.querySelectorAll('.fleet-metric-card');
+                if (metrics.length > 0 && !simulationRunning) {
+                    // Slightly vary the metrics to show "live" data
+                    const availabilityElement = metrics[1].querySelector('div[style*="font-size: 1.8rem"]');
+                    if (availabilityElement) {
+                        const currentValue = parseFloat(availabilityElement.textContent);
+                        const newValue = (currentValue + (Math.random() * 0.2 - 0.1)).toFixed(1);
+                        availabilityElement.textContent = newValue + '%';
+                    }
+                }
+            }, 30000);
+        });
+        
+        function showEngineDetailModal(engineData) {
+            // Create modal backdrop
+            const modalBackdrop = document.createElement('div');
+            modalBackdrop.id = 'engine-detail-modal';
+            modalBackdrop.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                backdrop-filter: blur(8px);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 2rem;
+                overflow-y: auto;
+                animation: fadeIn 0.3s ease-out;
+            `;
+            
+            // Create modal content
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: #1a1f2e;
+                border-radius: 16px;
+                max-width: 1200px;
+                width: 100%;
+                max-height: 90vh;
+                overflow-y: auto;
+                position: relative;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+                animation: slideInUp 0.4s ease-out;
+            `;
+            
+            const severityColor = engineData.severity === 'critical' ? '#ef4444' : '#f59e0b';
+            const statusIcon = engineData.severity === 'critical' ? '🔴' : '🟡';
+            
+            modalContent.innerHTML = `
+                <div style="background: linear-gradient(135deg, ${severityColor}, ${severityColor}dd); color: white; padding: 2rem; border-radius: 16px 16px 0 0; position: relative;">
+                    <button onclick="closeEngineDetailModal()" style="position: absolute; top: 1rem; right: 1rem; background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">✕ Close</button>
+                    <div style="display: grid; grid-template-columns: auto 1fr auto; gap: 2rem; align-items: center;">
+                        <div style="font-size: 4rem;">${statusIcon}</div>
+                        <div>
+                            <h2 style="margin: 0 0 0.5rem 0; font-size: 2rem;">${engineData.flight} - Engine Diagnostics</h2>
+                            <p style="margin: 0; opacity: 0.9; font-size: 1.1rem;">${engineData.aircraft} • ${engineData.engine}</p>
+                            <div style="background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 8px; margin-top: 1rem; display: inline-block;">
+                                <strong>${engineData.alert}</strong>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 2.5rem; font-weight: bold; margin-bottom: 0.25rem;">${engineData.riskValue}</div>
+                            <div style="opacity: 0.8;">Risk Value</div>
+                            <div style="margin-top: 1rem; font-size: 1.25rem;">${engineData.maintenanceWindow}</div>
+                            <div style="opacity: 0.8; font-size: 0.9rem;">Maintenance Window</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="padding: 2rem;">
+                    <!-- Engine Details -->
+                    <div style="background: #0f1419; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; border: 1px solid #374151;">
+                        <h3 style="color: #3b82f6; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            ⚙️ Engine Specifications
+                        </h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <div style="background: #1a1f2e; padding: 1rem; border-radius: 8px; border-left: 3px solid #3b82f6;">
+                                <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 0.25rem;">Aircraft</div>
+                                <div style="font-weight: bold; color: white;">${engineData.aircraft}</div>
+                            </div>
+                            <div style="background: #1a1f2e; padding: 1rem; border-radius: 8px; border-left: 3px solid #3b82f6;">
+                                <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 0.25rem;">Engine Model</div>
+                                <div style="font-weight: bold; color: white;">${engineData.engine}</div>
+                            </div>
+                            <div style="background: #1a1f2e; padding: 1rem; border-radius: 8px; border-left: 3px solid #3b82f6;">
+                                <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 0.25rem;">Serial Number</div>
+                                <div style="font-weight: bold; color: white;">${engineData.serialNumber}</div>
+                            </div>
+                            <div style="background: #1a1f2e; padding: 1rem; border-radius: 8px; border-left: 3px solid #3b82f6;">
+                                <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 0.25rem;">Position</div>
+                                <div style="font-weight: bold; color: white;">${engineData.position}</div>
+                            </div>
+                            <div style="background: #1a1f2e; padding: 1rem; border-radius: 8px; border-left: 3px solid #3b82f6;">
+                                <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 0.25rem;">Current Status</div>
+                                <div style="font-weight: bold; color: white;">${engineData.currentAltitude}</div>
+                            </div>
+                            <div style="background: #1a1f2e; padding: 1rem; border-radius: 8px; border-left: 3px solid #3b82f6;">
+                                <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 0.25rem;">Route</div>
+                                <div style="font-weight: bold; color: white;">${engineData.route}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Real-time Metrics -->
+                    <div style="background: #0f1419; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; border: 1px solid #374151;">
+                        <h3 style="color: #3b82f6; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            📈 Real-time Engine Metrics
+                        </h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+                            ${Object.entries(engineData.metrics).map(([key, metric]) => {
+                                let statusColor = '#10b981';
+                                if (metric.status === 'critical') statusColor = '#ef4444';
+                                else if (metric.status === 'elevated' || metric.status === 'declining' || metric.status === 'low') statusColor = '#f59e0b';
+                                else if (metric.status === 'ground' || metric.status === 'shutdown') statusColor = '#6b7280';
+                                
+                                let trendIcon = '→';
+                                if (metric.trend === 'increasing') trendIcon = '↗️';
+                                else if (metric.trend === 'decreasing') trendIcon = '↘️';
+                                
+                                return `
+                                    <div style="background: #1a1f2e; padding: 1rem; border-radius: 8px; border-left: 3px solid ${statusColor}; text-align: center;">
+                                        <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 0.5rem;">${key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}</div>
+                                        <div style="font-size: 1.5rem; font-weight: bold; color: ${statusColor}; margin-bottom: 0.25rem;">${metric.value} ${metric.unit}</div>
+                                        <div style="font-size: 0.75rem; opacity: 0.7; display: flex; align-items: center; justify-content: center; gap: 0.25rem;">
+                                            <span>${trendIcon}</span>
+                                            <span style="text-transform: capitalize;">${metric.status}</span>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                    
+                    <!-- Maintenance History -->
+                    <div style="background: #0f1419; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; border: 1px solid #374151;">
+                        <h3 style="color: #3b82f6; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            🔧 Maintenance History
+                        </h3>
+                        <div style="space-y: 1rem;">
+                            ${engineData.maintenanceHistory.map((record, index) => `
+                                <div style="background: #1a1f2e; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <div style="font-weight: bold; color: white; margin-bottom: 0.25rem;">${record.type}</div>
+                                        <div style="font-size: 0.85rem; opacity: 0.7;">Technician: ${record.technician}</div>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 0.25rem;">${record.date}</div>
+                                        <div style="background: ${record.status === 'Completed' ? '#10b981' : '#f59e0b'}; color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">${record.status}</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <!-- Predictive Analytics -->
+                    <div style="background: linear-gradient(135deg, #1d4ed8, #3b82f6); border-radius: 12px; padding: 1.5rem; color: white;">
+                        <h3 style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            🤖 AI Predictive Analytics
+                        </h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                            <div>
+                                <div style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                                    <div style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 0.5rem;">Failure Probability</div>
+                                    <div style="display: flex; align-items: center; gap: 1rem;">
+                                        <div style="font-size: 2rem; font-weight: bold;">${engineData.predictiveAnalytics.failureProbability}%</div>
+                                        <div style="flex: 1; background: rgba(255,255,255,0.2); border-radius: 10px; height: 8px; overflow: hidden;">
+                                            <div style="background: ${engineData.predictiveAnalytics.failureProbability > 70 ? '#ef4444' : engineData.predictiveAnalytics.failureProbability > 40 ? '#f59e0b' : '#10b981'}; height: 100%; width: ${engineData.predictiveAnalytics.failureProbability}%; transition: width 1s ease-out;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 1rem;">
+                                    <div style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 0.5rem;">Recommended Action</div>
+                                    <div style="font-weight: bold;">${engineData.predictiveAnalytics.recommendedAction}</div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                                    <div style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 0.5rem;">Cost Impact Analysis</div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                        <div style="text-align: center;">
+                                            <div style="font-size: 1.25rem; font-weight: bold; color: #10b981;">${engineData.predictiveAnalytics.costImpact.preventive}</div>
+                                            <div style="font-size: 0.75rem; opacity: 0.8;">Preventive Cost</div>
+                                        </div>
+                                        <div style="text-align: center;">
+                                            <div style="font-size: 1.25rem; font-weight: bold; color: #ef4444;">${engineData.predictiveAnalytics.costImpact.emergency}</div>
+                                            <div style="font-size: 0.75rem; opacity: 0.8;">Emergency Cost</div>
+                                        </div>
+                                    </div>
+                                    <div style="text-align: center; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.2);">
+                                        <div style="font-size: 1.5rem; font-weight: bold; color: #10b981;">${engineData.predictiveAnalytics.costImpact.savings}</div>
+                                        <div style="font-size: 0.75rem; opacity: 0.8;">Potential Savings</div>
+                                    </div>
+                                </div>
+                                <div style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 1rem; text-align: center;">
+                                    <div style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 0.5rem;">Fleet Impact</div>
+                                    <div style="font-weight: bold;">${engineData.predictiveAnalytics.fleetImpact}</div>
+                                    <div style="font-size: 0.85rem; margin-top: 0.5rem;">${engineData.predictiveAnalytics.similarCases} similar cases identified</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            modalBackdrop.appendChild(modalContent);
+            document.body.appendChild(modalBackdrop);
+            
+            // Prevent body scroll
+            document.body.style.overflow = 'hidden';
+            
+            // Close modal on backdrop click
+            modalBackdrop.addEventListener('click', (e) => {
+                if (e.target === modalBackdrop) {
+                    closeEngineDetailModal();
+                }
+            });
+            
+            // Close modal on escape key
+            document.addEventListener('keydown', handleEscapeKey);
+        }
+        
+        function closeEngineDetailModal() {
+            const modal = document.getElementById('engine-detail-modal');
+            if (modal) {
+                modal.style.animation = 'fadeOut 0.3s ease-out';
+                setTimeout(() => {
+                    document.body.removeChild(modal);
+                    document.body.style.overflow = 'auto';
+                    document.removeEventListener('keydown', handleEscapeKey);
+                }, 300);
+            }
+        }
+        
+        function handleEscapeKey(e) {
+            if (e.key === 'Escape') {
+                closeEngineDetailModal();
+            }
+        }
+        
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            
+            @keyframes fadeOut {
+                from { opacity: 1; }
+                to { opacity: 0; }
+            }
+            
+            @keyframes slideInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(50px) scale(0.95);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                }
+            }
+            
+            #engine-detail-modal {
+                scrollbar-width: thin;
+                scrollbar-color: #374151 #1a1f2e;
+            }
+            
+            #engine-detail-modal::-webkit-scrollbar {
+                width: 8px;
+            }
+            
+            #engine-detail-modal::-webkit-scrollbar-track {
+                background: #1a1f2e;
+                border-radius: 4px;
+            }
+            
+            #engine-detail-modal::-webkit-scrollbar-thumb {
+                background: #374151;
+                border-radius: 4px;
+            }
+            
+            #engine-detail-modal::-webkit-scrollbar-thumb:hover {
+                background: #4b5563;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Engine visualization interaction functions
+        function showTooltip(element, message) {
+            const tooltip = element.querySelector('.component-tooltip');
+            if (tooltip) {
+                tooltip.textContent = message;
+            }
+        }
+        
+        function highlightComponent(componentType) {
+            // Remove existing highlights
+            document.querySelectorAll('.component-indicator').forEach(indicator => {
+                indicator.style.boxShadow = '';
+                indicator.style.zIndex = '';
+            });
+            
+            // Highlight the specific component type
+            const componentMap = {
+                'turbine': [0, 1], // First two indicators (critical)
+                'oil': [2], // Oil system (warning)
+                'fan': [3], // Fan assembly (normal)
+                'vibration': [7] // Vibration monitor
+            };
+            
+            const indicators = document.querySelectorAll('.component-indicator');
+            if (componentMap[componentType]) {
+                componentMap[componentType].forEach(index => {
+                    if (indicators[index]) {
+                        indicators[index].style.boxShadow = '0 0 20px rgba(59, 130, 246, 0.8)';
+                        indicators[index].style.zIndex = '100';
+                    }
+                });
+            }
+        }
+        
+        function showEngineDetails() {
+            document.getElementById('engine-detail-modal').style.display = 'block';
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+        
+        function closeEngineDetails() {
+            document.getElementById('engine-detail-modal').style.display = 'none';
+            document.body.style.overflow = 'auto'; // Restore background scrolling
+        }
+        
+        // Close modal when clicking outside of it
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('engine-detail-modal');
+            if (event.target === modal) {
+                closeEngineDetails();
+            }
+        });
+        
+        // Executive dashboard metric highlighting
+        function highlightMetric(element, metricType) {
+            // Remove existing highlights
+            document.querySelectorAll('.executive-metric-card').forEach(card => {
+                card.style.transform = '';
+                card.style.zIndex = '';
+            });
+            
+            // Highlight selected metric
+            element.style.transform = 'translateY(-8px) scale(1.05)';
+            element.style.zIndex = '100';
+            
+            // Show contextual information based on metric type
+            const contextMessages = {
+                'incidents': '🛡️ Safety Excellence: Zero incidents for 30 consecutive days represents industry-leading safety performance. This achievement positions GE Aerospace as the gold standard for aviation safety.',
+                'preventive': '⚡ Proactive Safety: 847 preventive actions demonstrate our commitment to anticipating and preventing safety issues before they occur. This proactive approach saves lives and reduces costs.',
+                'value': '💰 Financial Impact: $47M in prevented incidents showcases the tangible ROI of our safety investments. Each dollar spent on safety systems returns $18.47 in prevented costs.',
+                'ai': '🤖 AI Innovation: 94.7% predictive accuracy with Claude Code represents a 12% improvement over traditional methods, enabling us to prevent failures before they happen.'
+            };
+            
+            // Show context after a brief delay for better UX
+            setTimeout(() => {
+                if (contextMessages[metricType]) {
+                    console.log('Executive Context:', contextMessages[metricType]);
+                }
+            }, 300);
+        }
+    </script>
+</body>
+</html>
