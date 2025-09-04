@@ -853,6 +853,23 @@
                 grid-template-columns: 1fr 1fr !important;
                 gap: 0.8rem !important;
             }
+            
+            /* Upstream operations mobile layout */
+            div[style*="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr))"] {
+                display: block !important;
+            }
+            
+            div[style*="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr))"] > div {
+                margin-bottom: 1.5rem !important;
+            }
+            
+            div[style*="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr))"] {
+                display: block !important;
+            }
+            
+            div[style*="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr))"] > div {
+                margin-bottom: 1.5rem !important;
+            }
         }
         
         /* Large desktops */
@@ -928,7 +945,7 @@
                     <div style="font-size: 0.9rem; opacity: 0.8;">Last Updated: <span id="timestamp">--:--:-- EST</span></div>
                 </div>
             
-            <div class="kpi-grid">
+            <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem;">
                 <div class="kpi-card">
                     <div class="kpi-value kpi-normal" id="active-wells">5,847</div>
                     <div>Active Wells</div>
@@ -940,19 +957,39 @@
                     <div style="font-size: 0.8rem; color: #10b981; margin-top: 0.3rem;">+2.3% vs yesterday</div>
                 </div>
                 <div class="kpi-card">
-                    <div class="kpi-value kpi-normal" id="daily-revenue">$3.2M</div>
-                    <div>Daily Revenue</div>
-                    <div style="font-size: 0.8rem; color: #10b981; margin-top: 0.3rem;">$3.78/MCF avg price</div>
+                    <div class="kpi-value kpi-normal" id="active-rigs">12</div>
+                    <div>Active Drilling Rigs</div>
+                    <div style="font-size: 0.8rem; color: #10b981; margin-top: 0.3rem;">3 new spuds this week</div>
                 </div>
                 <div class="kpi-card">
-                    <div class="kpi-value kpi-normal" id="pressure-avg">2,340</div>
-                    <div>Avg Wellhead Pressure</div>
-                    <div style="font-size: 0.8rem; color: #10b981; margin-top: 0.3rem;">PSI - fleet average</div>
+                    <div class="kpi-value kpi-normal" id="days-to-drill">8.2</div>
+                    <div>Avg Days to Drill</div>
+                    <div style="font-size: 0.8rem; color: #10b981; margin-top: 0.3rem;">vs 9.1 target (-10%)</div>
                 </div>
                 <div class="kpi-card">
-                    <div class="kpi-value kpi-normal" id="opex-per-mcf">$0.47</div>
-                    <div>Operating Cost</div>
-                    <div style="font-size: 0.8rem; color: #10b981; margin-top: 0.3rem;">$/MCF - field level</div>
+                    <div class="kpi-value kpi-normal" id="dc-cost">$7.2M</div>
+                    <div>D&C Cost per Well</div>
+                    <div style="font-size: 0.8rem; color: #10b981; margin-top: 0.3rem;">-8% vs budget</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value kpi-warning" id="wells-waiting">47</div>
+                    <div>Wells Waiting Completion</div>
+                    <div style="font-size: 0.8rem; color: #f59e0b; margin-top: 0.3rem;">2.1M BOE pending</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value kpi-normal" id="lateral-length">12,450</div>
+                    <div>Avg Lateral Length (ft)</div>
+                    <div style="font-size: 0.8rem; color: #10b981; margin-top: 0.3rem;">+3% vs plan</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value kpi-normal" id="trir-score">0.47</div>
+                    <div>TRIR Safety Score</div>
+                    <div style="font-size: 0.8rem; color: #10b981; margin-top: 0.3rem;">47 days no incidents</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value kpi-normal" id="methane-intensity">0.18</div>
+                    <div>Methane Intensity (%)</div>
+                    <div style="font-size: 0.8rem; color: #10b981; margin-top: 0.3rem;">Target: 0.20%</div>
                 </div>
                 <div class="kpi-card">
                     <div class="kpi-value kpi-warning" id="alerts-count">23</div>
@@ -999,6 +1036,87 @@
             <div class="production-chart">
                 <div class="chart-bars" id="production-chart">
                     <!-- Chart bars will be generated here -->
+                </div>
+            </div>
+            
+            <!-- Upstream Operations Intelligence -->
+            <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid #8b5cf6; border-radius: 12px; padding: 2rem; margin: 2rem 0;">
+                <h3 style="color: #8b5cf6; margin-bottom: 1.5rem;">🔧 Drilling & Completion Operations</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+                    <div>
+                        <div style="font-weight: bold; margin-bottom: 0.8rem; color: #e2e8f0;">Active Operations Status</div>
+                        <div style="font-size: 0.9rem; line-height: 1.6;">
+                            • <strong>Drilling Rigs Active:</strong> 12 rigs across 8 pads<br>
+                            • <strong>Current Spud Rate:</strong> 2.3 wells/week<br>
+                            • <strong>Completion Crews:</strong> 6 crews active<br>
+                            • <strong>Average Stages/Day:</strong> 18 stages (target: 16)<br>
+                            • <strong>Frac Fleet Utilization:</strong> 94% efficiency
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-weight: bold; margin-bottom: 0.8rem; color: #e2e8f0;">Performance Metrics</div>
+                        <div style="font-size: 0.9rem; line-height: 1.6;">
+                            • <strong>Drilling Speed:</strong> 485 ft/day avg (↑8%)<br>
+                            • <strong>EUR Performance:</strong> 2.1 Bcf avg (vs 1.9 type curve)<br>
+                            • <strong>First 30-Day IP:</strong> 24 MMcf/d avg<br>
+                            • <strong>Sweet Spot %:</strong> 78% of wells in Tier 1<br>
+                            • <strong>Capital Efficiency:</strong> $3,429/BOE/d
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Environmental & Safety Operations -->
+            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; border-radius: 12px; padding: 2rem; margin: 1rem 0;">
+                <h3 style="color: #10b981; margin-bottom: 1.5rem;">🌱 Environmental & Safety Excellence</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                    <div>
+                        <div style="font-weight: bold; margin-bottom: 0.8rem; color: #e2e8f0;">Safety Performance</div>
+                        <div style="font-size: 0.9rem; line-height: 1.6;">
+                            • <strong>Total Recordable Rate:</strong> 0.47 TRIR<br>
+                            • <strong>Days Since Incident:</strong> 47 days<br>
+                            • <strong>Safety Observations:</strong> 1,247 this month<br>
+                            • <strong>Near Miss Reports:</strong> 34 (trending ↓)<br>
+                            • <strong>Safety Training Hours:</strong> 2,340 completed
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-weight: bold; margin-bottom: 0.8rem; color: #e2e8f0;">Environmental Stewardship</div>
+                        <div style="font-size: 0.9rem; line-height: 1.6;">
+                            • <strong>Methane Intensity:</strong> 0.18% (target: 0.20%)<br>
+                            • <strong>Gas Capture Rate:</strong> 99.3% fleet average<br>
+                            • <strong>Water Recycling:</strong> 87% reuse rate<br>
+                            • <strong>Flowback Recovery:</strong> 2.1M bbls recycled<br>
+                            • <strong>Truck Rolls Eliminated:</strong> 234 via AI optimization
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real-Time Operations Intelligence -->
+            <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid #f59e0b; border-radius: 12px; padding: 2rem; margin: 1rem 0;">
+                <h3 style="color: #f59e0b; margin-bottom: 1.5rem;">⚡ Real-Time Field Intelligence</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div>
+                        <div style="font-weight: bold; margin-bottom: 0.8rem; color: #e2e8f0;">Production Optimization</div>
+                        <div style="font-size: 0.9rem; line-height: 1.6;">
+                            • <strong>New Well Performance:</strong> +15% vs type curve<br>
+                            • <strong>Artificial Lift Uptime:</strong> 94.2% (15 ESPs offline)<br>
+                            • <strong>Workover Queue:</strong> 15 wells ($12M incremental)<br>
+                            • <strong>Pressure Decline:</strong> 5% annual fleet average<br>
+                            • <strong>Water Cut Trending:</strong> 18% avg (↓2% MoM)
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-weight: bold; margin-bottom: 0.8rem; color: #e2e8f0;">Operational Efficiency</div>
+                        <div style="font-size: 0.9rem; line-height: 1.6;">
+                            • <strong>Completion Quality:</strong> 98.2% stage success rate<br>
+                            • <strong>Equipment Availability:</strong> 96.8% uptime<br>
+                            • <strong>Supply Chain:</strong> 0 critical delays<br>
+                            • <strong>Weather Impact:</strong> 2 operations affected<br>
+                            • <strong>Regulatory Compliance:</strong> 100% permit current
+                        </div>
+                    </div>
                 </div>
             </div>
             </div>
@@ -1056,6 +1174,26 @@
                         H2S level: 25 PPM (safety limit: 20 PPM)<br>
                         Personnel evacuation: Initiated<br>
                         Remote shutdown: Activated
+                    </div>
+                </div>
+
+                <div class="alert-item warning">
+                    <div class="alert-severity" style="color: #f59e0b;">🟡 WARNING - DRILLING PARAMETER</div>
+                    <div><strong>Rig ENSIGN-47:</strong> Weight on bit trending high</div>
+                    <div style="font-size: 0.8rem; margin-top: 0.5rem; opacity: 0.9;">
+                        WOB: 45k lbs (normal: 35k lbs)<br>
+                        Torque increase: +15% in last 2 hours<br>
+                        Potential hole cleaning issue
+                    </div>
+                </div>
+
+                <div class="alert-item warning">
+                    <div class="alert-severity" style="color: #f59e0b;">🟡 WARNING - COMPLETION DELAY</div>
+                    <div><strong>Pad GREENE-PAD-12:</strong> Frac crew equipment failure</div>
+                    <div style="font-size: 0.8rem; margin-top: 0.5rem; opacity: 0.9;">
+                        Pump #3 mechanical failure<br>
+                        Estimated delay: 6-8 hours<br>
+                        Impact: 47 stages remaining
                     </div>
                 </div>
 
