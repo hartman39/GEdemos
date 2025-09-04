@@ -1208,9 +1208,52 @@
                     </div>
                 </div>
 
-                <div class="controls">
-                    <button class="control-button" onclick="simulateEmergency()">🚨 Simulate Emergency</button>
-                    <button class="control-button" onclick="optimizeProduction()">⚡ Optimize Production</button>
+                <!-- Interactive Well Issue Simulation Panel -->
+                <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid #3b82f6; border-radius: 12px; padding: 2rem; margin: 2rem 0;">
+                    <h4 style="color: #3b82f6; margin-bottom: 1rem;">🎮 Interactive Well Issue Simulations</h4>
+                    <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 1.5rem;">
+                        As EVP of Upstream, test the system's AI-powered response to various operational scenarios. 
+                        Each simulation will trigger real-time alerts and provide remediation recommendations.
+                    </p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+                        <button class="control-button simulation-btn" onclick="simulateWellIssue('casing-leak')" style="background: #dc2626; border-color: #dc2626;">
+                            🔴 Simulate Casing Leak
+                            <div style="font-size: 0.8rem; opacity: 0.9; margin-top: 0.3rem;">High-pressure integrity failure</div>
+                        </button>
+                        <button class="control-button simulation-btn" onclick="simulateWellIssue('esp-failure')" style="background: #f59e0b; border-color: #f59e0b;">
+                            🟡 Simulate ESP Failure  
+                            <div style="font-size: 0.8rem; opacity: 0.9; margin-top: 0.3rem;">Electric submersible pump malfunction</div>
+                        </button>
+                        <button class="control-button simulation-btn" onclick="simulateWellIssue('gas-migration')" style="background: #ef4444; border-color: #ef4444;">
+                            🔴 Simulate Gas Migration
+                            <div style="font-size: 0.8rem; opacity: 0.9; margin-top: 0.3rem;">Unwanted gas flow in annulus</div>
+                        </button>
+                        <button class="control-button simulation-btn" onclick="simulateWellIssue('production-decline')" style="background: #f59e0b; border-color: #f59e0b;">
+                            🟡 Production Decline
+                            <div style="font-size: 0.8rem; opacity: 0.9; margin-top: 0.3rem;">Unexpected 15% flow rate drop</div>
+                        </button>
+                        <button class="control-button simulation-btn" onclick="simulateWellIssue('drilling-incident')" style="background: #dc2626; border-color: #dc2626;">
+                            🔴 Drilling Incident
+                            <div style="font-size: 0.8rem; opacity: 0.9; margin-top: 0.3rem;">Stuck pipe & circulation loss</div>
+                        </button>
+                        <button class="control-button simulation-btn" onclick="simulateWellIssue('environmental-alert')" style="background: #ef4444; border-color: #ef4444;">
+                            🔴 Environmental Alert
+                            <div style="font-size: 0.8rem; opacity: 0.9; margin-top: 0.3rem;">Methane emissions spike</div>
+                        </button>
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap;">
+                        <button class="control-button" onclick="clearAllSimulations()" style="background: #6b7280; border-color: #6b7280;">
+                            🔄 Clear All Simulations
+                        </button>
+                        <button class="control-button" onclick="optimizeProduction()" style="background: #059669; border-color: #059669;">
+                            ⚡ AI Auto-Optimize Fleet
+                        </button>
+                        <button class="control-button" onclick="generateIncidentReport()" style="background: #3b82f6; border-color: #3b82f6;">
+                            📊 Generate Incident Report
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1886,37 +1929,345 @@
             return data;
         }
 
-        // Simulate emergency scenario
-        function simulateEmergency() {
-            const alertsPanel = document.querySelector('.alerts-panel');
-            alertsPanel.style.borderLeftColor = '#dc2626';
+        // Enhanced Interactive Well Issue Simulation System
+        let activeSimulations = new Set();
+        let simulationData = {};
+
+        function simulateWellIssue(issueType) {
+            if (activeSimulations.has(issueType)) return;
+            activeSimulations.add(issueType);
             
-            // Add emergency alert to top
-            const emergencyAlert = document.createElement('div');
-            emergencyAlert.className = 'alert-item';
-            emergencyAlert.style.borderColor = '#dc2626';
-            emergencyAlert.style.background = 'rgba(220, 38, 38, 0.15)';
-            emergencyAlert.innerHTML = `
-                <div class="alert-severity" style="color: #dc2626;">🔴 EMERGENCY - BLOWOUT PREVENTER</div>
-                <div><strong>Well MONONGALIA-0001:</strong> BOP pressure test failure</div>
+            const scenarios = {
+                'casing-leak': {
+                    well: 'GREENE-0945',
+                    severity: 'critical',
+                    title: 'CRITICAL - CASING INTEGRITY',
+                    description: 'Casing leak detected at 8,500 ft depth',
+                    details: [
+                        'Annulus pressure: 950 PSI (normal: <50 PSI)',
+                        'Cement bond log: Poor bonding detected',
+                        'Production impact: Well shut-in immediately'
+                    ],
+                    recommendations: [
+                        '1. Immediate well shut-in completed ✓',
+                        '2. Deploy cement squeeze operation within 24 hrs',
+                        '3. Run casing inspection log to assess damage',
+                        '4. Notify regulatory authorities (PA DEP)',
+                        '5. Estimated repair cost: $2.8M, 14-day timeline'
+                    ],
+                    impact: {
+                        production: -24000,
+                        cost: 2800000,
+                        duration: 14
+                    }
+                },
+                'esp-failure': {
+                    well: 'WETZEL-1847',
+                    severity: 'warning',
+                    title: 'WARNING - ESP MOTOR FAILURE',
+                    description: 'Electric submersible pump motor overheating',
+                    details: [
+                        'Motor temperature: 195°F (limit: 180°F)',
+                        'Amp draw: 85A (normal: 65A)',
+                        'Vibration levels: Trending upward 3x normal'
+                    ],
+                    recommendations: [
+                        '1. Reduce production rate by 25% immediately',
+                        '2. Schedule workover rig for ESP replacement',
+                        '3. Deploy backup gas lift system (temp solution)',
+                        '4. Investigate power supply issues',
+                        '5. Estimated replacement cost: $450K, 3-day timeline'
+                    ],
+                    impact: {
+                        production: -8500,
+                        cost: 450000,
+                        duration: 3
+                    }
+                },
+                'gas-migration': {
+                    well: 'WASHINGTON-1204',
+                    severity: 'critical',
+                    title: 'CRITICAL - GAS MIGRATION',
+                    description: 'Unwanted gas migration in annulus space',
+                    details: [
+                        'Surface casing pressure: 425 PSI',
+                        'Methane detection: 2,100 PPM at wellhead',
+                        'Groundwater monitoring: Elevated hydrocarbon traces'
+                    ],
+                    recommendations: [
+                        '1. Emergency shut-in and secure wellhead ✓',
+                        '2. Install bleed-off system for pressure relief',
+                        '3. Drill relief well if migration continues',
+                        '4. 24/7 environmental monitoring',
+                        '5. Estimated remediation: $3.2M, 21-day timeline'
+                    ],
+                    impact: {
+                        production: -18000,
+                        cost: 3200000,
+                        duration: 21
+                    }
+                },
+                'production-decline': {
+                    well: 'DODDRIDGE-2341',
+                    severity: 'warning',
+                    title: 'WARNING - PRODUCTION DECLINE',
+                    description: 'Unexpected 15% production decline in 48 hours',
+                    details: [
+                        'Flow rate: 12.5 MMcf/d (was 14.7 MMcf/d)',
+                        'Wellhead pressure: 2,180 PSI (down from 2,340)',
+                        'Water cut: Increased to 23% (was 18%)'
+                    ],
+                    recommendations: [
+                        '1. Run production logging tool (PLT) survey',
+                        '2. Analyze reservoir pressure depletion',
+                        '3. Consider hydraulic fracture stimulation',
+                        '4. Evaluate artificial lift optimization',
+                        '5. Estimated intervention: $280K, 5-day timeline'
+                    ],
+                    impact: {
+                        production: -2200,
+                        cost: 280000,
+                        duration: 5
+                    }
+                },
+                'drilling-incident': {
+                    well: 'RIG-ENSIGN-47',
+                    severity: 'critical',
+                    title: 'CRITICAL - DRILLING INCIDENT',
+                    description: 'Stuck pipe with total circulation loss',
+                    details: [
+                        'Pipe stuck at: 11,250 ft MD',
+                        'Circulation: Complete loss since 14:30',
+                        'Overpull force: 650,000 lbs (max safe: 500K)'
+                    ],
+                    recommendations: [
+                        '1. Stop all pipe movement immediately ✓',
+                        '2. Pump lost circulation material (LCM)',
+                        '3. Consider sidetrack if pipe cannot be freed',
+                        '4. Deploy fishing tools and jarring assembly',
+                        '5. Estimated resolution: $890K, 7-day delay'
+                    ],
+                    impact: {
+                        production: 0,
+                        cost: 890000,
+                        duration: 7
+                    }
+                },
+                'environmental-alert': {
+                    well: 'PAD-GREENE-08',
+                    severity: 'critical',
+                    title: 'CRITICAL - ENVIRONMENTAL ALERT',
+                    description: 'Methane emissions spike detected',
+                    details: [
+                        'Methane concentration: 3,200 PPM (limit: 500 PPM)',
+                        'Leak source: Wellhead valve assembly',
+                        'Wind direction: Toward residential area'
+                    ],
+                    recommendations: [
+                        '1. Evacuate 500m radius around wellhead ✓',
+                        '2. Deploy emergency response team',
+                        '3. Repair/replace faulty valve assembly',
+                        '4. Notify EPA and state environmental agency',
+                        '5. Estimated resolution: $125K, 1-day timeline'
+                    ],
+                    impact: {
+                        production: -5000,
+                        cost: 125000,
+                        duration: 1
+                    }
+                }
+            };
+
+            const scenario = scenarios[issueType];
+            if (!scenario) return;
+
+            simulationData[issueType] = scenario;
+            
+            // Create and insert alert
+            const alertsPanel = document.querySelector('.alerts-panel');
+            const alertDiv = createSimulationAlert(scenario, issueType);
+            
+            // Insert after the header but before existing alerts
+            const headerDiv = alertsPanel.querySelector('div');
+            alertsPanel.insertBefore(alertDiv, headerDiv.nextSibling);
+            
+            // Update KPIs to reflect the issue
+            updateKPIsForSimulation(scenario);
+            
+            // Show immediate notification
+            showSimulationNotification(scenario);
+        }
+
+        function createSimulationAlert(scenario, issueType) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert-item ${scenario.severity} simulation-alert`;
+            alertDiv.dataset.simulation = issueType;
+            alertDiv.style.border = '2px solid #3b82f6';
+            alertDiv.style.background = 'rgba(59, 130, 246, 0.1)';
+            
+            alertDiv.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="alert-severity" style="color: ${scenario.severity === 'critical' ? '#ef4444' : '#f59e0b'};">
+                        ${scenario.severity === 'critical' ? '🔴' : '🟡'} ${scenario.title}
+                    </div>
+                    <button onclick="clearSimulation('${issueType}')" style="background: none; border: none; color: #6b7280; font-size: 1.2rem; cursor: pointer;">×</button>
+                </div>
+                <div><strong>${scenario.well}:</strong> ${scenario.description}</div>
                 <div style="font-size: 0.8rem; margin-top: 0.5rem; opacity: 0.9;">
-                    BOP test pressure: 2,100 PSI (required: 3,000 PSI)<br>
-                    AUTOMATIC SHUT-IN ACTIVATED<br>
-                    All personnel evacuated from wellsite
+                    ${scenario.details.join('<br>')}
+                </div>
+                <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; border-radius: 6px; padding: 1rem; margin-top: 1rem;">
+                    <div style="font-weight: bold; color: #10b981; margin-bottom: 0.5rem;">🤖 AI Remediation Plan</div>
+                    <div style="font-size: 0.85rem; line-height: 1.4;">
+                        ${scenario.recommendations.join('<br>')}
+                    </div>
+                </div>
+                <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 6px; padding: 0.8rem; margin-top: 0.8rem;">
+                    <div style="font-weight: bold; color: #ef4444; font-size: 0.9rem;">
+                        💰 Financial Impact: $${scenario.impact.cost.toLocaleString()} | 
+                        📉 Production: ${scenario.impact.production.toLocaleString()} MCF/d | 
+                        ⏱️ Duration: ${scenario.impact.duration} days
+                    </div>
                 </div>
             `;
             
-            alertsPanel.insertBefore(emergencyAlert, alertsPanel.children[1]);
+            return alertDiv;
+        }
+
+        function updateKPIsForSimulation(scenario) {
+            const alertsCount = document.getElementById('alerts-count');
+            const currentCount = parseInt(alertsCount.textContent);
+            alertsCount.textContent = currentCount + 1;
             
-            // Update KPI to show emergency impact
-            document.getElementById('alerts-count').textContent = '24';
-            document.getElementById('alerts-count').className = 'kpi-value kpi-critical';
+            if (scenario.severity === 'critical') {
+                alertsCount.className = 'kpi-value kpi-critical';
+            }
             
-            setTimeout(() => {
-                emergencyAlert.remove();
-                alertsPanel.style.borderLeftColor = '#ef4444';
-                document.getElementById('alerts-count').textContent = '23';
-            }, 10000);
+            if (Math.abs(scenario.impact.production) > 5000) {
+                const productionElement = document.getElementById('production-rate-ops');
+                const currentProduction = parseInt(productionElement.textContent.replace(/,/g, ''));
+                const newProduction = currentProduction + scenario.impact.production;
+                productionElement.textContent = newProduction.toLocaleString();
+            }
+        }
+
+        function showSimulationNotification(scenario) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed; top: 100px; right: 20px; z-index: 1000;
+                background: ${scenario.severity === 'critical' ? '#dc2626' : '#f59e0b'};
+                color: white; padding: 1rem; border-radius: 8px; max-width: 400px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            `;
+            
+            notification.innerHTML = `
+                <div style="font-weight: bold;">🚨 SIMULATION ACTIVATED</div>
+                <div style="margin-top: 0.5rem;">${scenario.well}: ${scenario.description}</div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.remove(), 4000);
+        }
+
+        function clearSimulation(issueType) {
+            if (!activeSimulations.has(issueType)) return;
+            
+            activeSimulations.delete(issueType);
+            const scenario = simulationData[issueType];
+            delete simulationData[issueType];
+            
+            const alertElement = document.querySelector(`[data-simulation="${issueType}"]`);
+            if (alertElement) alertElement.remove();
+            
+            restoreKPIsFromSimulation(scenario);
+        }
+
+        function clearAllSimulations() {
+            document.querySelectorAll('.simulation-alert').forEach(alert => alert.remove());
+            activeSimulations.clear();
+            simulationData = {};
+            
+            document.getElementById('alerts-count').textContent = '23';
+            document.getElementById('alerts-count').className = 'kpi-value kpi-warning';
+            document.getElementById('production-rate-ops').textContent = '847,320';
+        }
+
+        function restoreKPIsFromSimulation(scenario) {
+            const alertsCount = document.getElementById('alerts-count');
+            const currentCount = parseInt(alertsCount.textContent);
+            alertsCount.textContent = Math.max(23, currentCount - 1);
+            
+            if (activeSimulations.size === 0) {
+                alertsCount.className = 'kpi-value kpi-warning';
+            }
+            
+            if (Math.abs(scenario.impact.production) > 5000) {
+                const productionElement = document.getElementById('production-rate-ops');
+                const currentProduction = parseInt(productionElement.textContent.replace(/,/g, ''));
+                const restoredProduction = currentProduction - scenario.impact.production;
+                productionElement.textContent = restoredProduction.toLocaleString();
+            }
+        }
+
+        function generateIncidentReport() {
+            if (activeSimulations.size === 0) {
+                alert('No active simulations to report on. Please run a simulation first.');
+                return;
+            }
+            
+            let totalCost = 0;
+            let totalProductionImpact = 0;
+            let reportContent = 'EQT WELLSTREAM - INCIDENT SIMULATION REPORT\\n';
+            reportContent += '='.repeat(50) + '\\n\\n';
+            reportContent += `Generated: ${new Date().toLocaleString()}\\n`;
+            reportContent += `Active Simulations: ${activeSimulations.size}\\n\\n`;
+            
+            for (const [type, scenario] of Object.entries(simulationData)) {
+                totalCost += scenario.impact.cost;
+                totalProductionImpact += Math.abs(scenario.impact.production);
+                
+                reportContent += `INCIDENT: ${scenario.title}\\n`;
+                reportContent += `Well/Location: ${scenario.well}\\n`;
+                reportContent += `Description: ${scenario.description}\\n`;
+                reportContent += `Financial Impact: $${scenario.impact.cost.toLocaleString()}\\n`;
+                reportContent += `Production Impact: ${scenario.impact.production.toLocaleString()} MCF/d\\n`;
+                reportContent += `Duration: ${scenario.impact.duration} days\\n\\n`;
+                reportContent += 'Remediation Plan:\\n';
+                scenario.recommendations.forEach(rec => {
+                    reportContent += `  ${rec}\\n`;
+                });
+                reportContent += '\\n' + '-'.repeat(40) + '\\n\\n';
+            }
+            
+            reportContent += `SUMMARY:\\n`;
+            reportContent += `Total Financial Impact: $${totalCost.toLocaleString()}\\n`;
+            reportContent += `Total Production Impact: ${totalProductionImpact.toLocaleString()} MCF/d\\n`;
+            
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center;
+                z-index: 2000;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: #1e293b; padding: 2rem; border-radius: 12px; max-width: 80%; max-height: 80%; overflow: auto;">
+                    <h3 style="color: #3b82f6; margin-bottom: 1rem;">📊 Incident Simulation Report</h3>
+                    <pre style="white-space: pre-wrap; font-size: 0.9rem; line-height: 1.4; color: #e2e8f0;">${reportContent}</pre>
+                    <button onclick="this.closest('div').parentElement.remove()" 
+                            style="background: #3b82f6; border: none; color: white; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; margin-top: 1rem;">
+                        Close Report
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        // Legacy function for backward compatibility
+        function simulateEmergency() {
+            simulateWellIssue('casing-leak');
         }
 
         // Optimize production simulation
