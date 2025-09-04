@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code for GE Healthcare - Accelerate $2.2B Innovation Pipeline</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: #1a1a1a;
+            font-weight: 400;
+        }
+        
+        .executive-badge {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: #1a1a1a;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .value-prop-highlight {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 16px;
+            margin: 2rem 0;
+        }
+        
+        .executive-summary {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 3rem;
+            margin: 3rem 0;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .roi-banner {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 1rem 2rem;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .trust-indicators {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .trust-badge {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #475569;
+        }
+        
+        .quote-section {
+            background: #f8fafc;
+            border-left: 4px solid #3b82f6;
+            padding: 2rem;
+            margin: 2rem 0;
+            font-style: italic;
+            font-size: 1.1rem;
+        }
+        
+        .primary-cta {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+            padding: 18px 40px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .primary-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(220, 38, 38, 0.4);
+        }
+        
+        .secondary-cta {
+            background: transparent;
+            color: #3b82f6;
+            border: 2px solid #3b82f6;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            margin-left: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .secondary-cta:hover {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .metric-highlight {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #dc2626;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 4rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" fill="none"><path d="M0,40L1200,120L1200,0L0,0Z" fill="rgba(255,255,255,0.03)"/></svg>');
+            pointer-events: none;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+        
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        .cta-button {
+            background: #f59e0b;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.3s;
+        }
+        
+        .cta-button:hover {
+            background: #d97706;
+        }
+        
+        .section {
+            padding: 4rem 0;
+        }
+        
+        .section:nth-child(even) {
+            background: #f8fafc;
+        }
+        
+        .section h2 {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            color: #1e293b;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #1e293b;
+        }
+        
+        .feature-card p {
+            color: #64748b;
+            margin-bottom: 1rem;
+        }
+        
+        .roi-highlight {
+            background: #10b981;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+        
+        .video-section {
+            text-align: center;
+            padding: 3rem 0;
+            background: #1e293b;
+            color: white;
+        }
+        
+        .video-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: #374151;
+            padding: 2rem;
+            border-radius: 12px;
+        }
+        
+        .use-cases {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+        
+        .use-case {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #06b6d4;
+        }
+        
+        .use-case h3 {
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+        
+        .use-case .roi-metric {
+            background: #dcfce7;
+            color: #166534;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-weight: 600;
+        }
+        
+        .impact-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #3b82f6;
+            display: block;
+        }
+        
+        .stat-label {
+            color: #64748b;
+            margin-top: 0.5rem;
+        }
+        
+        footer {
+            background: #1e293b;
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero p {
+                font-size: 1.1rem;
+            }
+            
+            .section h2 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="hero">
+                <div class="executive-badge">Exclusive Enterprise Preview</div>
+                <h1>Accelerate Medical Device Innovation with Claude Code</h1>
+                <p>Transform your healthcare software development with AI-powered coding assistance designed for GE Healthcare's mission-critical applications</p>
+                <div class="value-prop-highlight">
+                    <div class="metric-highlight">$17.2M</div>
+                    <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem;">Estimated Annual Value Potential Across 4 Strategic Use Cases</div>
+                    <div style="opacity: 0.9;">50-60% faster development • FDA compliance automation • Real-time patient care optimization</div>
+                </div>
+                <div style="margin-top: 3rem;">
+                    <a href="#executive-briefing" class="primary-cta">Request Executive Briefing</a>
+                    <a href="#demo" class="secondary-cta">View Technical Demo</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="roi-banner">
+        <div class="container">
+            🏆 Industry Leader: 85 FDA AI Device Authorizations • $2.2B R&D Investment • 14,000+ Devices Served
+        </div>
+    </div>
+    
+    <section class="section">
+        <div class="container">
+            <div class="executive-summary">
+                <h2 style="text-align: left; margin-bottom: 2rem; color: #1e293b;">Executive Summary: Strategic AI Development Acceleration</h2>
+                <div style="background: #f8fafc; border-left: 4px solid #3b82f6; padding: 2rem; margin: 2rem 0; border-radius: 8px;">
+                    <h4 style="color: #1e293b; margin-bottom: 1rem;">Industry Challenge</h4>
+                    <p style="color: #64748b; font-size: 1.1rem; line-height: 1.7;">Healthcare technology companies face increasing pressure to accelerate FDA-compliant software development while maintaining the highest safety standards. The complexity of medical device regulations, combined with the need for rapid innovation, creates a critical bottleneck in bringing life-saving technologies to market.</p>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
+                    <div>
+                        <h4 style="color: #1e293b; margin-bottom: 1rem;">Strategic Impact</h4>
+                        <ul style="color: #64748b; line-height: 1.8;">
+                            <li>60% acceleration in FDA-compliant device software</li>
+                            <li>40% reduction in PACS integration complexity</li>
+                            <li>$17.2M projected annual value across initiatives</li>
+                            <li>6-month competitive advantage in NVIDIA partnership</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="color: #1e293b; margin-bottom: 1rem;">Enterprise Readiness</h4>
+                        <ul style="color: #64748b; line-height: 1.8;">
+                            <li>SOC 2 Type II compliant infrastructure</li>
+                            <li>HIPAA-ready deployment options</li>
+                            <li>Enterprise-grade security & audit logs</li>
+                            <li>Dedicated support for Fortune 50 implementations</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <h2>Transform Critical Healthcare Development Workflows</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="metric-highlight" style="font-size: 2rem;">60%</div>
+                    <h3>AI-Powered Medical Device Software</h3>
+                    <p><strong>Strategic Value:</strong> Accelerate development of FDA-compliant medical device applications with Claude Code's deep understanding of healthcare regulations and safety standards.</p>
+                    <div class="roi-highlight">$2.5M - $8.7M Estimated Value</div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="metric-highlight" style="font-size: 2rem;">40%</div>
+                    <h3>PACS Integration & Imaging Solutions</h3>
+                    <p><strong>Strategic Value:</strong> Streamline development of Edison True PACS enhancements and imaging workflow applications with intelligent code generation and debugging.</p>
+                    <div class="roi-highlight">$2.5M Annual Integration Savings</div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="metric-highlight" style="font-size: 2rem;">90%+</div>
+                    <h3>AI-Enabled Diagnostic Tools</h3>
+                    <p><strong>Strategic Value:</strong> Build sophisticated AI models for diagnostic imaging faster with Claude Code's assistance in machine learning pipeline development and optimization.</p>
+                    <div class="roi-highlight">SonoSAMTrack Accuracy Achievement</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="video-section" id="demo">
+        <div class="container">
+            <h2>Live Demo: DiagnosticAI Studio - Medical Imaging Analysis</h2>
+            <div class="video-container">
+                <h3>Interactive Demonstration: AI-Powered Medical Imaging with SonoSAMTrack</h3>
+                <p>Experience how Claude Code accelerates development of FDA-compliant diagnostic AI with real-time medical image analysis, achieving 94.7% accuracy in just 2.3 seconds.</p>
+                <div style="margin: 2rem 0; text-align: center;">
+                    <a href="#" onclick="openDiagnosticDemo()" class="primary-cta" style="margin-right: 1rem;">Launch Live Demo</a>
+                    <a href="https://www.anthropic.com/claude-code" class="secondary-cta" target="_blank">View Claude Code Overview</a>
+                </div>
+                <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                    <div style="font-weight: bold; margin-bottom: 0.5rem;">🏥 Demo Highlights:</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">
+                        • Real-time CT scan analysis • 94.7% SonoSAMTrack accuracy • 42-minute to 3-minute diagnostic time • FDA 510(k) compliance automation
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- DiagnosticAI Demo Modal -->
+    <div id="demo-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10000; overflow-y: auto;">
+        <div style="position: relative; width: 100%; height: 100%;">
+            <button onclick="closeDiagnosticDemo()" style="position: absolute; top: 20px; right: 20px; background: #dc2626; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; z-index: 10001; font-weight: bold;">✕ Close Demo</button>
+            <iframe id="demo-iframe" src="" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+
+    <section class="section">
+        <div class="container">
+            <h2>Impact on GE Healthcare's Key Applications</h2>
+            <div class="impact-stats">
+                <div class="stat-card">
+                    <span class="stat-number">85</span>
+                    <div class="stat-label">FDA AI Device Authorizations<br>Leading the Industry</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">$2.2B</span>
+                    <div class="stat-label">R&D Investment Since 2022<br>Enhanced by AI Development</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">14K+</span>
+                    <div class="stat-label">Medical Devices in Field<br>Requiring Software Updates</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">200K</span>
+                    <div class="stat-label">Training Images for SonoSAMTrack<br>90%+ Accuracy Achieved</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <h2>Strategic Use Cases for GE Healthcare</h2>
+            <div class="use-cases">
+                <div class="use-case">
+                    <h3>1. App Orchestrator Platform Enhancement</h3>
+                    <p>Rapidly develop and integrate new healthcare applications into the App Orchestrator ecosystem, ensuring seamless PACS compatibility and workflow optimization.</p>
+                    <div class="roi-metric">ROI: $2.5M annual savings from 40% faster integration cycles</div>
+                </div>
+
+                <div class="use-case">
+                    <h3>2. Command Center AI Development</h3>
+                    <p>Accelerate development of predictive analytics and real-time decision support tools for the Command Center Software Platform, enhancing patient care orchestration.</p>
+                    <div class="roi-metric">ROI: $4.2M value from 35% improvement in care efficiency</div>
+                </div>
+
+                <div class="use-case">
+                    <h3>3. NVIDIA Partnership Acceleration</h3>
+                    <p>Fast-track development of autonomous X-ray and ultrasound systems using NVIDIA Isaac platform, reducing time-to-market for breakthrough diagnostic solutions.</p>
+                    <div class="roi-metric">ROI: $8.7M competitive advantage from 6-month faster deployment</div>
+                </div>
+
+                <div class="use-case">
+                    <h3>4. Regulatory Compliance Automation</h3>
+                    <p>Streamline FDA submission processes and compliance documentation with automated code review and validation for medical device software updates.</p>
+                    <div class="roi-metric">ROI: $1.8M annual savings from 50% reduction in compliance overhead</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="executive-briefing">
+        <div class="container">
+            <div style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); color: white; padding: 4rem 2rem; border-radius: 20px; text-align: center;">
+                <h2 style="color: white; margin-bottom: 2rem;">Exclusive Executive Briefing for GE Healthcare Leadership</h2>
+                <div class="trust-indicators" style="justify-content: center; margin: 2rem 0;">
+                    <div class="trust-badge" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); color: white;">SOC 2 Type II</div>
+                    <div class="trust-badge" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); color: white;">HIPAA Ready</div>
+                    <div class="trust-badge" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); color: white;">Fortune 50 Proven</div>
+                    <div class="trust-badge" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); color: white;">24/7 Enterprise Support</div>
+                </div>
+                <p style="font-size: 1.3rem; margin-bottom: 3rem; opacity: 0.95;">Join C-suite executives from leading healthcare technology companies in a confidential briefing on AI-accelerated development strategy.</p>
+                <div style="margin-top: 3rem;">
+                    <a href="mailto:enterprise@anthropic.com?subject=Confidential Executive Briefing - GE Healthcare Claude Code&body=Dear Anthropic Enterprise Team,%0A%0AI am requesting a confidential executive briefing for GE Healthcare leadership regarding Claude Code's strategic applications in medical device development.%0A%0APlease coordinate directly with our office to schedule at the C-suite level.%0A%0ARegards," class="primary-cta">Request Confidential Briefing</a>
+                    <div style="margin-top: 1.5rem; font-size: 0.9rem; opacity: 0.8;">
+                        ⏱ Priority scheduling for Fortune 50 executives • 📋 Custom ROI analysis • 🔒 NDA protection available
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 3rem; text-align: center; padding: 2rem; background: #f8fafc; border-radius: 12px;">
+                <h3 style="color: #1e293b; margin-bottom: 1rem;">Alternative: Technical Demonstration</h3>
+                <p style="color: #64748b; margin-bottom: 2rem;">For technical teams and implementation planning</p>
+                <a href="mailto:sales@anthropic.com?subject=Claude Code Technical Demo - GE Healthcare" class="secondary-cta">Schedule Technical Demo</a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem; padding: 3rem 0;">
+            <div>
+                <h4 style="color: white; margin-bottom: 1rem;">Enterprise Contact</h4>
+                <p style="opacity: 0.8;">enterprise@anthropic.com</p>
+                <p style="opacity: 0.8;">Fortune 50 Priority Line</p>
+            </div>
+            <div>
+                <h4 style="color: white; margin-bottom: 1rem;">Compliance & Security</h4>
+                <p style="opacity: 0.8;">SOC 2 Type II Certified</p>
+                <p style="opacity: 0.8;">HIPAA Business Associate Available</p>
+            </div>
+            <div>
+                <h4 style="color: white; margin-bottom: 1rem;">Strategic Partnership</h4>
+                <p style="opacity: 0.8;">Designed for GE Healthcare's</p>
+                <p style="opacity: 0.8;">$2.2B Innovation Pipeline</p>
+            </div>
+        </div>
+        <div style="text-align: center; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.2);">
+            <p>&copy; 2025 Anthropic. Claude Code - Transforming Healthcare Software Development</p>
+        </div>
+    </footer>
+    
+    <script>
+        function openDiagnosticDemo() {
+            const modal = document.getElementById('demo-modal');
+            const iframe = document.getElementById('demo-iframe');
+            iframe.src = 'diagnosticai-demo.html';
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeDiagnosticDemo() {
+            const modal = document.getElementById('demo-modal');
+            const iframe = document.getElementById('demo-iframe');
+            modal.style.display = 'none';
+            iframe.src = '';
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Close demo on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeDiagnosticDemo();
+            }
+        });
+    </script>
+</body>
+</html>

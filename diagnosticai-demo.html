@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DiagnosticAI Studio - Medical Imaging Analysis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0e16;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+        
+        .demo-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .patient-info {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+        
+        .main-workspace {
+            display: grid;
+            grid-template-columns: 1fr 1fr 350px;
+            gap: 2rem;
+            padding: 2rem;
+            height: calc(100vh - 80px);
+        }
+        
+        .imaging-viewer {
+            background: #1a1f2e;
+            border-radius: 12px;
+            padding: 2rem;
+            position: relative;
+        }
+        
+        .scan-display {
+            width: 100%;
+            height: 400px;
+            background: #000;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #374151;
+        }
+        
+        .scan-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, 
+                transparent 0%, 
+                rgba(59, 130, 246, 0.03) 25%, 
+                transparent 50%, 
+                rgba(59, 130, 246, 0.03) 75%, 
+                transparent 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .scan-display::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                linear-gradient(90deg, transparent 0%, rgba(100,100,100,0.1) 1px, transparent 2px) 0 0 / 20px 20px,
+                linear-gradient(0deg, transparent 0%, rgba(100,100,100,0.1) 1px, transparent 2px) 0 0 / 20px 20px;
+            pointer-events: none;
+            z-index: 2;
+            opacity: 0.3;
+        }
+        
+        .scan-image {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at 60% 40%, rgba(30, 30, 30, 1) 0%, rgba(0,0,0,1) 70%);
+            position: relative;
+            transition: all 0.4s ease-in-out;
+            z-index: 3;
+        }
+        
+        .scan-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        
+        .anomaly-marker {
+            position: absolute;
+            border: 3px solid #ef4444;
+            border-radius: 50%;
+            background: rgba(239, 68, 68, 0.3);
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5), inset 0 0 10px rgba(239, 68, 68, 0.3);
+        }
+        
+        .anomaly-1 { 
+            top: 32%; 
+            left: 62%; 
+            width: 28px; 
+            height: 28px;
+        }
+        
+        .anomaly-2 { 
+            top: 48%; 
+            left: 32%; 
+            width: 22px; 
+            height: 22px;
+            border-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.3);
+            box-shadow: 0 0 8px rgba(245, 158, 11, 0.5), inset 0 0 8px rgba(245, 158, 11, 0.3);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+        
+        .scan-controls {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .control-btn {
+            background: #374151;
+            border: 1px solid #4b5563;
+            color: #ffffff;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn:hover {
+            background: #4b5563;
+        }
+        
+        .control-btn.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+        }
+        
+        .analysis-panel {
+            background: #1a1f2e;
+            border-radius: 12px;
+            padding: 2rem;
+        }
+        
+        .ai-insights {
+            background: #1a1f2e;
+            border-radius: 12px;
+            padding: 2rem;
+            border-left: 4px solid #10b981;
+        }
+        
+        .claude-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .claude-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .finding-item {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid #10b981;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .finding-critical {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+        }
+        
+        .confidence-bar {
+            width: 100%;
+            height: 8px;
+            background: #374151;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #059669);
+            transition: width 2s ease-in-out;
+        }
+        
+        .critical-fill {
+            background: linear-gradient(90deg, #ef4444, #dc2626);
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .metric-card {
+            background: #374151;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #10b981;
+        }
+        
+        .time-saved {
+            background: linear-gradient(135deg, #059669, #047857);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .processing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(59, 130, 246, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+        
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #374151;
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .development-badge {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(30, 58, 138, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        .accuracy-indicator {
+            background: linear-gradient(135deg, #10b981, #059669);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .scan-metadata {
+            background: #374151;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-header">
+        <div class="patient-info">
+            <div style="width: 12px; height: 12px; background: #10b981; border-radius: 50%;"></div>
+            <div>
+                <div style="font-size: 1.5rem; font-weight: bold;">Patient: Anonymous</div>
+                <div style="opacity: 0.8;">CT Scan • Chest • Emergency Protocol</div>
+            </div>
+        </div>
+        <div>
+            <div style="text-align: right;">
+                <div style="font-size: 1.2rem; font-weight: bold;">SonoSAMTrack AI</div>
+                <div style="color: #10b981;">✓ Analysis Complete</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-workspace">
+        <div class="imaging-viewer">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3>Medical Imaging Viewer</h3>
+                <div style="color: #10b981; font-weight: bold;">DICOM Loaded</div>
+            </div>
+            
+            <div class="scan-display">
+                <div class="scan-image">
+                    <!-- Anatomy will be dynamically loaded based on selected view -->
+                </div>
+                
+                <div class="scan-overlay" id="anomaly-overlay">
+                    <!-- Anomaly markers will be dynamically positioned based on view -->
+                </div>
+            </div>
+            
+            <div class="scan-controls">
+                <button class="control-btn active" onclick="setView('axial', this)">Axial</button>
+                <button class="control-btn" onclick="setView('sagittal', this)">Sagittal</button>
+                <button class="control-btn" onclick="setView('coronal', this)">Coronal</button>
+                <button class="control-btn" onclick="toggleAI()">AI Overlay</button>
+            </div>
+            
+            <div class="scan-metadata">
+                <div><strong>Study:</strong> CT Chest w/o Contrast</div>
+                <div><strong>Slice:</strong> 45/128 (3.5mm thickness)</div>
+                <div><strong>Window:</strong> Lung (W:1500 L:-600)</div>
+                <div><strong>Acquired:</strong> 2025-01-15 14:23:17</div>
+            </div>
+        </div>
+
+        <div class="analysis-panel">
+            <h3 style="margin-bottom: 1rem;">Diagnostic Analysis</h3>
+            
+            <div class="accuracy-indicator">
+                <div style="font-size: 1.1rem; font-weight: bold;">SonoSAMTrack Accuracy</div>
+                <div style="font-size: 2rem; font-weight: 900;">94.7%</div>
+                <div style="font-size: 0.9rem; opacity: 0.9;">Based on 200K+ training images</div>
+            </div>
+            
+            <div class="processing-indicator">
+                <div class="spinner"></div>
+                <div>
+                    <div style="font-weight: bold;">Processing Complete</div>
+                    <div style="font-size: 0.9rem; opacity: 0.8;">Analysis time: 2.3 seconds</div>
+                </div>
+            </div>
+            
+            <div class="finding-item finding-critical">
+                <div style="color: #ef4444; font-weight: bold; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 0.5rem;">
+                    🔴 CRITICAL FINDING
+                </div>
+                <div style="font-weight: bold; margin-bottom: 0.5rem;">Pulmonary Nodule Detected</div>
+                <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.5rem;">
+                    12mm irregular nodule in right upper lobe. Characteristics suggest malignancy risk.
+                </div>
+                <div style="font-size: 0.8rem; opacity: 0.7;">Confidence Level:</div>
+                <div class="confidence-bar">
+                    <div class="confidence-fill critical-fill" style="width: 87%;"></div>
+                </div>
+                <div style="font-size: 0.8rem; text-align: right;">87%</div>
+            </div>
+            
+            <div class="finding-item">
+                <div style="color: #f59e0b; font-weight: bold; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 0.5rem;">
+                    🟡 ATTENTION
+                </div>
+                <div style="font-weight: bold; margin-bottom: 0.5rem;">Ground Glass Opacity</div>
+                <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.5rem;">
+                    Subtle ground glass opacity in left lower lobe. Monitor for progression.
+                </div>
+                <div style="font-size: 0.8rem; opacity: 0.7;">Confidence Level:</div>
+                <div class="confidence-bar">
+                    <div class="confidence-fill" style="width: 73%;"></div>
+                </div>
+                <div style="font-size: 0.8rem; text-align: right;">73%</div>
+            </div>
+            
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value">2.3s</div>
+                    <div style="font-size: 0.9rem;">Analysis Time</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">128</div>
+                    <div style="font-size: 0.9rem;">Slices Analyzed</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ai-insights">
+            <div class="claude-header">
+                <div class="claude-avatar">C</div>
+                <div>
+                    <div style="font-weight: bold;">Claude Code Insights</div>
+                    <div style="font-size: 0.9rem; opacity: 0.8;">AI Development Analytics</div>
+                </div>
+            </div>
+
+            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                <div style="font-weight: bold; color: #10b981; margin-bottom: 0.5rem;">✅ AUTOMATED WORKFLOW</div>
+                <div style="font-size: 0.9rem;">
+                    Claude Code generated the complete image processing pipeline, including DICOM parsing, segmentation algorithms, and ML inference optimization.
+                </div>
+            </div>
+
+            <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid #3b82f6; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                <div style="font-weight: bold; color: #3b82f6; margin-bottom: 0.5rem;">🚀 DEVELOPMENT ACCELERATION</div>
+                <div style="font-size: 0.9rem;">
+                    Traditional ML pipeline: 8-12 months<br>
+                    With Claude Code: 3-4 months<br>
+                    <strong>67% faster development</strong>
+                </div>
+            </div>
+
+            <div class="time-saved">
+                <div style="font-size: 1rem; margin-bottom: 0.5rem;">Clinical Impact</div>
+                <div style="font-size: 1.8rem; font-weight: 900;">42 min → 3 min</div>
+                <div style="font-size: 0.9rem; opacity: 0.9;">Average diagnostic time reduction</div>
+            </div>
+
+            <div style="margin-top: 2rem;">
+                <h4 style="margin-bottom: 1rem;">FDA Compliance</h4>
+                <div style="display: grid; grid-template-columns: 1fr; gap: 0.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;">
+                        <span style="color: #10b981;">✓</span> 510(k) Documentation Generated
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;">
+                        <span style="color: #10b981;">✓</span> Clinical Validation Protocol
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;">
+                        <span style="color: #10b981;">✓</span> Risk Management (ISO 14971)
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 2rem;">
+                <button class="control-btn" onclick="runAnalysis()">Rerun Analysis</button>
+                <button class="control-btn" onclick="exportReport()">Export Report</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="development-badge">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <span style="background: #10b981; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">
+                Claude Code Powered
+            </span>
+            <span>67% faster development</span>
+        </div>
+    </div>
+
+    <script>
+        function setView(viewType, clickedButton) {
+            // Update active button
+            document.querySelectorAll('.control-btn').forEach(btn => btn.classList.remove('active'));
+            
+            // Use the passed button or find by event target
+            const targetButton = clickedButton || event.target;
+            targetButton.classList.add('active');
+            
+            // Fade out current view
+            const scanImage = document.querySelector('.scan-image');
+            scanImage.style.opacity = '0.2';
+            scanImage.style.transform = 'scale(0.95)';
+            
+            // Update slice counter and metadata
+            const sliceInfo = document.querySelector('.scan-metadata div:nth-child(2)');
+            const viewInfo = document.querySelector('.scan-metadata div:nth-child(3)');
+            
+            setTimeout(() => {
+                // Clear existing anatomy
+                scanImage.innerHTML = '';
+                
+                // Create different anatomical views
+                if (viewType === 'axial') {
+                    // Axial view - horizontal cross-section (original chest view)
+                    scanImage.innerHTML = createAxialView();
+                    sliceInfo.innerHTML = '<strong>Slice:</strong> 45/128 (3.5mm thickness)';
+                    viewInfo.innerHTML = '<strong>Window:</strong> Lung (W:1500 L:-600)';
+                } else if (viewType === 'sagittal') {
+                    // Sagittal view - side profile view
+                    scanImage.innerHTML = createSagittalView();
+                    sliceInfo.innerHTML = '<strong>Slice:</strong> 87/256 (2.0mm thickness)';
+                    viewInfo.innerHTML = '<strong>Window:</strong> Soft Tissue (W:400 L:40)';
+                } else if (viewType === 'coronal') {
+                    // Coronal view - front-to-back view
+                    scanImage.innerHTML = createCoronalView();
+                    sliceInfo.innerHTML = '<strong>Slice:</strong> 156/192 (2.5mm thickness)';
+                    viewInfo.innerHTML = '<strong>Window:</strong> Mediastinal (W:350 L:50)';
+                }
+                
+                // Fade in new view
+                scanImage.style.opacity = '1';
+                scanImage.style.transform = 'scale(1)';
+                scanImage.style.filter = 'none';
+                
+                // Update anomaly markers for the new view
+                updateAnomalyMarkers(viewType);
+            }, 400);
+        }
+        
+        function toggleAI() {
+            const overlay = document.querySelector('.scan-overlay');
+            const markers = overlay.querySelectorAll('.anomaly-marker');
+            
+            if (markers.length === 0) {
+                // Show markers
+                updateAnomalyMarkers(getCurrentView());
+            } else {
+                // Hide markers
+                overlay.innerHTML = '';
+            }
+        }
+        
+        function getCurrentView() {
+            const activeButton = document.querySelector('.control-btn.active');
+            return activeButton ? activeButton.textContent.toLowerCase() : 'axial';
+        }
+        
+        function updateAnomalyMarkers(viewType) {
+            const overlay = document.getElementById('anomaly-overlay');
+            overlay.innerHTML = ''; // Clear existing markers
+            
+            if (viewType === 'axial') {
+                overlay.innerHTML = `
+                    <div class="anomaly-marker" style="top: 32%; left: 62%; width: 28px; height: 28px; 
+                         border: 3px solid #ef4444; background: rgba(239, 68, 68, 0.3); 
+                         box-shadow: 0 0 10px rgba(239, 68, 68, 0.5); animation: pulse 2s infinite;"></div>
+                    <div class="anomaly-marker" style="top: 48%; left: 32%; width: 22px; height: 22px;
+                         border: 3px solid #f59e0b; background: rgba(245, 158, 11, 0.3);
+                         box-shadow: 0 0 8px rgba(245, 158, 11, 0.5); animation: pulse 2s infinite;"></div>
+                `;
+            } else if (viewType === 'sagittal') {
+                overlay.innerHTML = `
+                    <div class="anomaly-marker" style="top: 40%; left: 50%; width: 24px; height: 24px;
+                         border: 3px solid #ef4444; background: rgba(239, 68, 68, 0.3);
+                         box-shadow: 0 0 10px rgba(239, 68, 68, 0.5); animation: pulse 2s infinite;"></div>
+                    <div class="anomaly-marker" style="top: 55%; left: 45%; width: 18px; height: 18px;
+                         border: 3px solid #f59e0b; background: rgba(245, 158, 11, 0.3);
+                         box-shadow: 0 0 8px rgba(245, 158, 11, 0.5); animation: pulse 2s infinite;"></div>
+                `;
+            } else if (viewType === 'coronal') {
+                overlay.innerHTML = `
+                    <div class="anomaly-marker" style="top: 45%; left: 58%; width: 26px; height: 26px;
+                         border: 3px solid #ef4444; background: rgba(239, 68, 68, 0.3);
+                         box-shadow: 0 0 10px rgba(239, 68, 68, 0.5); animation: pulse 2s infinite;"></div>
+                    <div class="anomaly-marker" style="top: 60%; left: 38%; width: 20px; height: 20px;
+                         border: 3px solid #f59e0b; background: rgba(245, 158, 11, 0.3);
+                         box-shadow: 0 0 8px rgba(245, 158, 11, 0.5); animation: pulse 2s infinite;"></div>
+                `;
+            }
+        }
+        
+        function runAnalysis() {
+            // Simulate reanalysis
+            const processingIndicator = document.querySelector('.processing-indicator');
+            processingIndicator.style.background = 'rgba(59, 130, 246, 0.1)';
+            
+            setTimeout(() => {
+                processingIndicator.style.background = 'rgba(16, 185, 129, 0.1)';
+            }, 2000);
+        }
+        
+        function exportReport() {
+            alert('Diagnostic report exported to PACS system');
+        }
+        
+        // Simulate real-time confidence updates
+        function updateConfidence() {
+            const confidenceBars = document.querySelectorAll('.confidence-fill');
+            confidenceBars.forEach(bar => {
+                const currentWidth = parseInt(bar.style.width);
+                const variation = (Math.random() - 0.5) * 4; // ±2% variation
+                const newWidth = Math.max(70, Math.min(95, currentWidth + variation));
+                bar.style.width = newWidth + '%';
+                bar.parentNode.nextElementSibling.textContent = Math.round(newWidth) + '%';
+            });
+        }
+        
+        // Anatomical view generators
+        function createAxialView() {
+            return `
+                <!-- Chest cavity outline -->
+                <div style="position: absolute; top: 10%; left: 15%; width: 70%; height: 80%; 
+                            border: 2px solid rgba(200,200,200,0.4); border-radius: 50% 50% 60% 60%; 
+                            background: rgba(100,100,100,0.1);"></div>
+                
+                <!-- Left lung -->
+                <div style="position: absolute; top: 25%; left: 25%; width: 20%; height: 40%; 
+                            background: radial-gradient(ellipse, rgba(150,150,150,0.4) 0%, rgba(80,80,80,0.3) 70%, transparent 100%);
+                            border-radius: 60% 40% 60% 40%; opacity: 0.8;"></div>
+                
+                <!-- Right lung -->
+                <div style="position: absolute; top: 25%; left: 55%; width: 20%; height: 40%; 
+                            background: radial-gradient(ellipse, rgba(150,150,150,0.4) 0%, rgba(80,80,80,0.3) 70%, transparent 100%);
+                            border-radius: 40% 60% 40% 60%; opacity: 0.8;"></div>
+                
+                <!-- Heart shadow -->
+                <div style="position: absolute; top: 35%; left: 42%; width: 16%; height: 25%; 
+                            background: rgba(120,120,120,0.3); border-radius: 50% 30% 50% 70%;"></div>
+                
+                <!-- Ribs -->
+                <div style="position: absolute; top: 20%; left: 18%; width: 64%; height: 3px; 
+                            background: linear-gradient(90deg, transparent 0%, rgba(220,220,220,0.6) 20%, rgba(220,220,220,0.6) 80%, transparent 100%); 
+                            border-radius: 2px; transform: rotate(-2deg);"></div>
+                <div style="position: absolute; top: 28%; left: 16%; width: 68%; height: 3px; 
+                            background: linear-gradient(90deg, transparent 0%, rgba(220,220,220,0.6) 20%, rgba(220,220,220,0.6) 80%, transparent 100%); 
+                            border-radius: 2px; transform: rotate(-1deg);"></div>
+                <div style="position: absolute; top: 36%; left: 15%; width: 70%; height: 3px; 
+                            background: linear-gradient(90deg, transparent 0%, rgba(220,220,220,0.6) 20%, rgba(220,220,220,0.6) 80%, transparent 100%); 
+                            border-radius: 2px;"></div>
+                <div style="position: absolute; top: 44%; left: 16%; width: 68%; height: 3px; 
+                            background: linear-gradient(90deg, transparent 0%, rgba(220,220,220,0.6) 20%, rgba(220,220,220,0.6) 80%, transparent 100%); 
+                            border-radius: 2px; transform: rotate(1deg);"></div>
+                <div style="position: absolute; top: 52%; left: 18%; width: 64%; height: 3px; 
+                            background: linear-gradient(90deg, transparent 0%, rgba(220,220,220,0.6) 20%, rgba(220,220,220,0.6) 80%, transparent 100%); 
+                            border-radius: 2px; transform: rotate(2deg);"></div>
+                
+                <!-- Spine -->
+                <div style="position: absolute; top: 15%; left: 48%; width: 4%; height: 70%; 
+                            background: linear-gradient(180deg, rgba(200,200,200,0.4) 0%, rgba(180,180,180,0.5) 50%, rgba(200,200,200,0.4) 100%); 
+                            border-radius: 50%;"></div>
+            `;
+        }
+        
+        function createSagittalView() {
+            return `
+                <!-- Chest profile outline -->
+                <div style="position: absolute; top: 15%; left: 20%; width: 60%; height: 70%; 
+                            border: 2px solid rgba(200,200,200,0.4); 
+                            border-radius: 40% 20% 80% 60%; 
+                            background: rgba(100,100,100,0.1);"></div>
+                
+                <!-- Lung profile (side view) -->
+                <div style="position: absolute; top: 25%; left: 35%; width: 30%; height: 50%; 
+                            background: radial-gradient(ellipse, rgba(150,150,150,0.4) 0%, rgba(80,80,80,0.3) 70%, transparent 100%);
+                            border-radius: 30% 70% 70% 30%; opacity: 0.8;"></div>
+                
+                <!-- Heart profile -->
+                <div style="position: absolute; top: 40%; left: 25%; width: 20%; height: 25%; 
+                            background: rgba(120,120,120,0.4); border-radius: 60% 40% 50% 70%;"></div>
+                
+                <!-- Sternum -->
+                <div style="position: absolute; top: 25%; left: 22%; width: 3%; height: 40%; 
+                            background: rgba(220,220,220,0.6); border-radius: 50%;"></div>
+                
+                <!-- Vertebral column (side view) -->
+                <div style="position: absolute; top: 20%; left: 70%; width: 8%; height: 55%; 
+                            background: linear-gradient(180deg, rgba(200,200,200,0.5) 0%, rgba(180,180,180,0.6) 50%, rgba(200,200,200,0.5) 100%);
+                            border-radius: 40%;"></div>
+                
+                <!-- Diaphragm -->
+                <div style="position: absolute; top: 72%; left: 25%; width: 45%; height: 3%; 
+                            background: rgba(180,180,180,0.5); border-radius: 50%; transform: rotate(-8deg);"></div>
+            `;
+        }
+        
+        function createCoronalView() {
+            return `
+                <!-- Chest frontal outline -->
+                <div style="position: absolute; top: 20%; left: 25%; width: 50%; height: 65%; 
+                            border: 2px solid rgba(200,200,200,0.4); 
+                            border-radius: 40% 40% 70% 70%; 
+                            background: rgba(100,100,100,0.1);"></div>
+                
+                <!-- Both lungs (frontal view) -->
+                <div style="position: absolute; top: 30%; left: 30%; width: 15%; height: 45%; 
+                            background: radial-gradient(ellipse, rgba(150,150,150,0.4) 0%, rgba(80,80,80,0.3) 70%, transparent 100%);
+                            border-radius: 50%; opacity: 0.8;"></div>
+                <div style="position: absolute; top: 30%; left: 55%; width: 15%; height: 45%; 
+                            background: radial-gradient(ellipse, rgba(150,150,150,0.4) 0%, rgba(80,80,80,0.3) 70%, transparent 100%);
+                            border-radius: 50%; opacity: 0.8;"></div>
+                
+                <!-- Mediastinum (central structures) -->
+                <div style="position: absolute; top: 35%; left: 47%; width: 6%; height: 35%; 
+                            background: rgba(140,140,140,0.4); border-radius: 30%;"></div>
+                
+                <!-- Clavicles -->
+                <div style="position: absolute; top: 25%; left: 35%; width: 12%; height: 2%; 
+                            background: rgba(220,220,220,0.6); border-radius: 50%; transform: rotate(15deg);"></div>
+                <div style="position: absolute; top: 25%; left: 53%; width: 12%; height: 2%; 
+                            background: rgba(220,220,220,0.6); border-radius: 50%; transform: rotate(-15deg);"></div>
+                
+                <!-- Trachea -->
+                <div style="position: absolute; top: 20%; left: 48.5%; width: 3%; height: 20%; 
+                            background: rgba(60,60,60,0.4); border-radius: 50%;"></div>
+            `;
+        }
+        
+        // Update confidence every 3 seconds
+        setInterval(updateConfidence, 3000);
+        
+        // Initialize confidence bars and default view
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize with axial view and anomaly markers
+            const scanImage = document.querySelector('.scan-image');
+            scanImage.innerHTML = createAxialView();
+            updateAnomalyMarkers('axial');
+            
+            setTimeout(() => {
+                document.querySelectorAll('.confidence-fill').forEach(bar => {
+                    bar.style.transition = 'width 1s ease-in-out';
+                });
+            }, 500);
+        });
+    </script>
+</body>
+</html>

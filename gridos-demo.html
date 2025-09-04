@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GridOS Command Center - Real-Time Grid Optimization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0f17;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+        
+        .demo-header {
+            background: linear-gradient(135deg, #065f46 0%, #10b981 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .grid-status {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+        
+        .main-control-room {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            padding: 2rem;
+            height: calc(100vh - 80px);
+        }
+        
+        .grid-visualization {
+            background: #1a1f2e;
+            border-radius: 12px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .usa-grid-map {
+            width: 100%;
+            height: 400px;
+            background: linear-gradient(135deg, #1e293b, #334155);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #475569;
+        }
+        
+        .grid-node {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        .renewable-node {
+            background: #10b981;
+            box-shadow: 0 0 10px #10b981;
+        }
+        
+        .traditional-node {
+            background: #6b7280;
+            box-shadow: 0 0 10px #6b7280;
+        }
+        
+        .storage-node {
+            background: #3b82f6;
+            box-shadow: 0 0 10px #3b82f6;
+        }
+        
+        .critical-node {
+            background: #ef4444;
+            box-shadow: 0 0 15px #ef4444;
+        }
+        
+        /* Grid node positions (simulating major US grid points) */
+        .node-1 { top: 20%; left: 75%; } /* Northeast */
+        .node-2 { top: 40%; left: 70%; } /* Southeast */
+        .node-3 { top: 35%; left: 50%; } /* Texas */
+        .node-4 { top: 25%; left: 40%; } /* Midwest */
+        .node-5 { top: 15%; left: 25%; } /* West */
+        .node-6 { top: 30%; left: 15%; } /* California */
+        .node-7 { top: 45%; left: 60%; } /* Florida */
+        .node-8 { top: 20%; left: 55%; } /* Great Lakes */
+        
+        .power-line {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #10b981, transparent);
+            opacity: 0.6;
+        }
+        
+        .line-1 { top: 22%; left: 25%; width: 50%; transform: rotate(15deg); }
+        .line-2 { top: 32%; left: 40%; width: 30%; transform: rotate(-10deg); }
+        .line-3 { top: 28%; left: 15%; width: 60%; transform: rotate(5deg); }
+        
+        .renewable-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .stat-card {
+            background: #374151;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #10b981;
+            margin-bottom: 0.5rem;
+        }
+        
+        .ai-control-panel {
+            background: #1a1f2e;
+            border-radius: 12px;
+            padding: 2rem;
+            border-left: 4px solid #10b981;
+        }
+        
+        .claude-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .claude-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .alert-panel {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .optimization-panel {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid #10b981;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .renewable-forecast {
+            margin-bottom: 2rem;
+        }
+        
+        .forecast-chart {
+            width: 100%;
+            height: 100px;
+            background: #374151;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        
+        .forecast-line {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 60%;
+            background: linear-gradient(to right, 
+                #10b981 0%, #10b981 20%, 
+                #f59e0b 20%, #f59e0b 40%, 
+                #10b981 40%, #10b981 60%, 
+                #059669 60%, #059669 80%, 
+                #10b981 80%, #10b981 100%);
+            opacity: 0.7;
+            border-radius: 4px 4px 0 0;
+        }
+        
+        .cost-savings {
+            background: linear-gradient(135deg, #059669, #047857);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .derms-section {
+            margin-top: 2rem;
+        }
+        
+        .der-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .der-item {
+            background: #374151;
+            padding: 1rem;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .der-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .status-online { background: #10b981; }
+        .status-offline { background: #ef4444; }
+        .status-maintenance { background: #f59e0b; }
+        
+        .control-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .control-btn {
+            background: #374151;
+            border: 1px solid #4b5563;
+            color: #ffffff;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn:hover {
+            background: #4b5563;
+            transform: translateY(-2px);
+        }
+        
+        .emergency-btn {
+            background: #dc2626;
+            border-color: #dc2626;
+        }
+        
+        .emergency-btn:hover {
+            background: #b91c1c;
+        }
+        
+        .development-badge {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(6, 95, 70, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .weather-overlay {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+        
+        .grid-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .metric-display {
+            background: #374151;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .metric-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #10b981;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-header">
+        <div class="grid-status">
+            <div style="width: 12px; height: 12px; background: #10b981; border-radius: 50%; animation: pulse 2s infinite;"></div>
+            <div>
+                <div style="font-size: 1.5rem; font-weight: bold;">US Grid Operations</div>
+                <div style="opacity: 0.8;">GridOS® Command Center • Live Monitoring</div>
+            </div>
+        </div>
+        <div>
+            <div style="text-align: right;">
+                <div style="font-size: 1.2rem; font-weight: bold;">Renewable Integration</div>
+                <div style="color: #10b981; font-weight: bold;">68.3% Active</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-control-room">
+        <div style="display: flex; flex-direction: column; gap: 2rem;">
+            <div class="grid-visualization">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3>National Grid Overview</h3>
+                    <div style="color: #10b981; font-weight: bold;">LIVE: 847 GW Total Capacity</div>
+                </div>
+                
+                <div class="usa-grid-map">
+                    <!-- Grid nodes representing major interconnections -->
+                    <div class="grid-node renewable-node node-1"></div>
+                    <div class="grid-node traditional-node node-2"></div>
+                    <div class="grid-node renewable-node node-3"></div>
+                    <div class="grid-node storage-node node-4"></div>
+                    <div class="grid-node renewable-node node-5"></div>
+                    <div class="grid-node renewable-node node-6"></div>
+                    <div class="grid-node critical-node node-7"></div>
+                    <div class="grid-node storage-node node-8"></div>
+                    
+                    <!-- Power transmission lines -->
+                    <div class="power-line line-1"></div>
+                    <div class="power-line line-2"></div>
+                    <div class="power-line line-3"></div>
+                    
+                    <div class="weather-overlay" id="weather-display">
+                        🌤️ Clear • 🌬️ 12 mph winds • ☀️ High solar
+                    </div>
+                </div>
+                
+                <div class="renewable-stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="solar-output">287 GW</div>
+                        <div>Solar Generation</div>
+                        <div style="font-size: 0.8rem; color: #10b981;">↗ +12% from forecast</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="wind-output">156 GW</div>
+                        <div>Wind Generation</div>
+                        <div style="font-size: 0.8rem; color: #10b981;">↗ +8% from forecast</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="storage-level">94 GWh</div>
+                        <div>Battery Storage</div>
+                        <div style="font-size: 0.8rem; color: #f59e0b;">→ Stable</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="background: #1a1f2e; border-radius: 12px; padding: 2rem;">
+                <h3 style="margin-bottom: 1rem;">Real-Time Grid Optimization</h3>
+                
+                <div class="grid-metrics">
+                    <div class="metric-display">
+                        <div class="metric-number">68.3%</div>
+                        <div>Renewable Penetration</div>
+                    </div>
+                    <div class="metric-display">
+                        <div class="metric-number">99.97%</div>
+                        <div>Grid Reliability</div>
+                    </div>
+                </div>
+                
+                <div class="forecast-chart">
+                    <div class="forecast-line"></div>
+                </div>
+                <div style="font-size: 0.9rem; opacity: 0.8; text-align: center;">24-Hour Renewable Generation Forecast</div>
+            </div>
+        </div>
+
+        <div class="ai-control-panel">
+            <div class="claude-header">
+                <div class="claude-avatar">G</div>
+                <div>
+                    <div style="font-weight: bold;">GridOS® AI Orchestration</div>
+                    <div style="font-size: 0.9rem; opacity: 0.8;">Powered by Claude Code</div>
+                </div>
+            </div>
+
+            <div class="alert-panel">
+                <div style="color: #ef4444; font-weight: bold; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 0.5rem;">
+                    ⚠️ GRID STRESS EVENT
+                </div>
+                <div style="font-weight: bold; margin-bottom: 0.5rem;">Florida Interconnect</div>
+                <div style="font-size: 0.9rem; margin-bottom: 1rem;">
+                    Unexpected cloud cover reducing solar by 23%. Auto-dispatching battery storage and gas peakers.
+                </div>
+                <div style="font-size: 0.8rem; color: #f59e0b;">
+                    🤖 AI Response: Load balancing in progress (47 seconds)
+                </div>
+            </div>
+
+            <div class="optimization-panel">
+                <div style="color: #10b981; font-weight: bold; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 0.5rem;">
+                    ✅ OPTIMIZATION ACTIVE
+                </div>
+                <div style="font-weight: bold; margin-bottom: 0.5rem;">Dynamic Line Rating</div>
+                <div style="font-size: 0.9rem; margin-bottom: 1rem;">
+                    Current weather conditions allow 43% transmission capacity increase on western corridors.
+                </div>
+                <div style="font-size: 0.8rem; color: #10b981;">
+                    💰 Savings: $2.3M today from avoided curtailment
+                </div>
+            </div>
+
+            <div class="renewable-forecast">
+                <h4>DERMS Integration Status</h4>
+                <div style="font-size: 0.9rem; margin: 1rem 0; opacity: 0.8;">
+                    Managing 847,000+ distributed energy resources
+                </div>
+                
+                <div class="der-grid">
+                    <div class="der-item">
+                        <span>Rooftop Solar</span>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span>543 GW</span>
+                            <div class="der-status status-online"></div>
+                        </div>
+                    </div>
+                    <div class="der-item">
+                        <span>Home Batteries</span>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span>89 GWh</span>
+                            <div class="der-status status-online"></div>
+                        </div>
+                    </div>
+                    <div class="der-item">
+                        <span>EV Charging</span>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span>156 MW</span>
+                            <div class="der-status status-maintenance"></div>
+                        </div>
+                    </div>
+                    <div class="der-item">
+                        <span>Wind Farms</span>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span>234 GW</span>
+                            <div class="der-status status-online"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cost-savings">
+                <div style="font-size: 1rem; margin-bottom: 0.5rem;">Today's AI Optimization Savings</div>
+                <div style="font-size: 2rem; font-weight: 900;">$47.3M</div>
+                <div style="font-size: 0.9rem; opacity: 0.9;">Avoided outages + optimized dispatch</div>
+            </div>
+
+            <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid #3b82f6; border-radius: 8px; padding: 1rem; margin-top: 1rem;">
+                <div style="font-weight: bold; color: #3b82f6; margin-bottom: 0.5rem;">📊 DEVELOPMENT IMPACT</div>
+                <div style="font-size: 0.9rem; margin-bottom: 0.5rem;">
+                    Claude Code accelerated GridOS® development by 52%, enabling rapid deployment of:
+                </div>
+                <ul style="font-size: 0.8rem; margin-left: 1rem; opacity: 0.9;">
+                    <li>Real-time renewable forecasting algorithms</li>
+                    <li>DERMS optimization engines</li>
+                    <li>Dynamic load balancing systems</li>
+                    <li>Carbon emissions tracking APIs</li>
+                </ul>
+            </div>
+
+            <div style="margin-top: 2rem;">
+                <h4 style="margin-bottom: 1rem; color: #f59e0b;">⚡ Grid Resilience Simulations</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <button class="control-btn" onclick="simulateStorm()">🌪️ Hurricane Impact</button>
+                    <button class="control-btn" onclick="simulateWildfire()">🔥 Wildfire Threat</button>
+                    <button class="control-btn" onclick="simulatePlantOutage()">⚡ Plant Outage</button>
+                    <button class="control-btn" onclick="simulateCyberAttack()">🛡️ Cyber Incident</button>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <button class="control-btn" onclick="simulateHeatWave()">🌡️ Extreme Heat</button>
+                    <button class="control-btn" onclick="simulateIceStorm()">🧊 Ice Storm</button>
+                    <button class="control-btn" onclick="optimizeGrid()">✅ Optimize Grid</button>
+                    <button class="control-btn emergency-btn" onclick="emergencyResponse()">🚨 Emergency Mode</button>
+                </div>
+            </div>
+            
+            <div style="margin-top: 2rem;">
+                <h4 style="margin-bottom: 1rem;">Standard Operations</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <button class="control-btn" onclick="forecastUpdate()">Update Forecast</button>
+                    <button class="control-btn" onclick="exportData()">Export Data</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="development-badge">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <span style="background: #10b981; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">
+                GridOS® + Claude Code
+            </span>
+            <span>52% faster development</span>
+        </div>
+    </div>
+
+    <script>
+        // Simulate real-time grid data updates
+        function updateGridMetrics() {
+            const solarOutput = document.getElementById('solar-output');
+            const windOutput = document.getElementById('wind-output');
+            const storageLevel = document.getElementById('storage-level');
+            
+            // Simulate fluctuating renewable generation
+            const baseSolar = 287;
+            const baseWind = 156;
+            const baseStorage = 94;
+            
+            const timeOfDay = new Date().getHours();
+            const solarMultiplier = timeOfDay >= 6 && timeOfDay <= 18 ? 1 : 0.1; // Solar only during day
+            
+            const newSolar = Math.max(0, (baseSolar * solarMultiplier + (Math.random() - 0.5) * 30));
+            const newWind = Math.max(50, baseWind + (Math.random() - 0.5) * 40);
+            const newStorage = Math.max(20, Math.min(120, baseStorage + (Math.random() - 0.5) * 10));
+            
+            solarOutput.textContent = Math.round(newSolar) + ' GW';
+            windOutput.textContent = Math.round(newWind) + ' GW';
+            storageLevel.textContent = Math.round(newStorage) + ' GWh';
+        }
+        
+        function optimizeGrid() {
+            // Simulate grid optimization
+            const optimizationPanel = document.querySelector('.optimization-panel');
+            optimizationPanel.style.background = 'rgba(59, 130, 246, 0.1)';
+            optimizationPanel.style.borderColor = '#3b82f6';
+            
+            setTimeout(() => {
+                optimizationPanel.style.background = 'rgba(16, 185, 129, 0.1)';
+                optimizationPanel.style.borderColor = '#10b981';
+            }, 3000);
+        }
+        
+        function emergencyResponse() {
+            // Simulate emergency response
+            const alertPanel = document.querySelector('.alert-panel');
+            alertPanel.style.background = 'rgba(220, 38, 38, 0.15)';
+            alertPanel.innerHTML = `
+                <div style="color: #dc2626; font-weight: bold; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 0.5rem;">
+                    🚨 EMERGENCY MODE ACTIVE
+                </div>
+                <div style="font-weight: bold; margin-bottom: 0.5rem;">Load Shedding Protocol</div>
+                <div style="font-size: 0.9rem; margin-bottom: 1rem;">
+                    Critical infrastructure protected. Non-essential loads reduced by 15%.
+                </div>
+                <div style="font-size: 0.8rem; color: #dc2626;">
+                    ⚡ Emergency reserves deployed: 2,347 MW
+                </div>
+            `;
+        }
+        
+        function forecastUpdate() {
+            // Simulate forecast update
+            const forecastLine = document.querySelector('.forecast-line');
+            forecastLine.style.opacity = '0.3';
+            
+            setTimeout(() => {
+                forecastLine.style.background = `linear-gradient(to right, 
+                    #10b981 0%, #10b981 15%, 
+                    #059669 15%, #059669 35%, 
+                    #f59e0b 35%, #f59e0b 50%, 
+                    #10b981 50%, #10b981 75%, 
+                    #059669 75%, #059669 100%)`;
+                forecastLine.style.opacity = '0.7';
+            }, 1500);
+        }
+        
+        function exportData() {
+            alert('Grid performance data exported to GridOS® Analytics Platform');
+        }
+        
+        // Grid Resilience Simulations
+        function simulateStorm() {
+            updateGridStatus('🌪️ HURRICANE CATEGORY 3', 'Storm affecting Southeast region. 450+ transmission lines down. Wind speeds 120 mph.', '#dc2626');
+            updateWeatherDisplay('storm');
+            
+            // Update grid nodes to show storm impact
+            const nodes = document.querySelectorAll('.grid-node');
+            nodes[1].className = 'grid-node critical-node node-2'; // Southeast affected
+            nodes[6].className = 'grid-node critical-node node-7'; // Florida critical
+            
+            updateMetrics({
+                renewable: '156 GW (-45% storm impact)',
+                storage: '89 GWh (emergency discharge)',
+                savings: '$89.2M (outage prevention)'
+            });
+            
+            showRecoveryTimeline('Hurricane recovery: 72-96 hours estimated');
+        }
+        
+        function simulateWildfire() {
+            updateGridStatus('🔥 WILDFIRE EMERGENCY', 'Active fires in California affecting 12 transmission corridors. Preemptive shutoffs activated.', '#dc2626');
+            updateWeatherDisplay('wildfire');
+            
+            const nodes = document.querySelectorAll('.grid-node');
+            nodes[4].className = 'grid-node critical-node node-5'; // West affected
+            nodes[5].className = 'grid-node critical-node node-6'; // California critical
+            
+            updateMetrics({
+                renewable: '198 GW (-30% fire impact)',
+                storage: '67 GWh (load balancing)',
+                savings: '$67.8M (fire damage prevention)'
+            });
+            
+            showRecoveryTimeline('Fire containment: 48-72 hours estimated');
+        }
+        
+        function simulatePlantOutage() {
+            updateGridStatus('⚡ MAJOR PLANT OUTAGE', '2.4 GW nuclear facility offline. Unplanned maintenance. Dispatching reserves and imports.', '#f59e0b');
+            updateWeatherDisplay('outage');
+            
+            const nodes = document.querySelectorAll('.grid-node');
+            nodes[3].className = 'grid-node offline-node node-4'; // Midwest plant offline
+            
+            updateMetrics({
+                renewable: '287 GW (compensating outage)',
+                storage: '78 GWh (peak shaving)',
+                savings: '$34.5M (avoided spot market)'
+            });
+            
+            showRecoveryTimeline('Plant restart: 12-24 hours estimated');
+        }
+        
+        function simulateCyberAttack() {
+            updateGridStatus('🛡️ CYBERSECURITY INCIDENT', 'Attempted intrusion detected. Systems isolated. Manual controls activated. FBI notified.', '#7c3aed');
+            updateWeatherDisplay('cyber');
+            
+            // Show emergency status on multiple nodes
+            const nodes = document.querySelectorAll('.grid-node');
+            nodes[0].className = 'grid-node emergency-node node-1';
+            nodes[2].className = 'grid-node emergency-node node-3';
+            nodes[4].className = 'grid-node emergency-node node-5';
+            
+            updateMetrics({
+                renewable: '287 GW (manual operation)',
+                storage: '94 GWh (secure mode)',
+                savings: '$125M+ (attack mitigation)'
+            });
+            
+            showRecoveryTimeline('Security audit: 24-48 hours');
+        }
+        
+        function simulateHeatWave() {
+            updateGridStatus('🌡️ EXTREME HEAT EVENT', 'Record temperatures 115°F+. Peak demand +23%. Rolling blackout risk. Load shedding protocols ready.', '#f59e0b');
+            updateWeatherDisplay('heatwave');
+            
+            // Show stress on southwestern nodes
+            const nodes = document.querySelectorAll('.grid-node');
+            nodes[2].className = 'grid-node critical-node node-3'; // Texas heat
+            nodes[5].className = 'grid-node critical-node node-6'; // California heat
+            
+            updateMetrics({
+                renewable: '198 GW (-31% efficiency loss)',
+                storage: '45 GWh (peak discharge)',
+                savings: '$45.7M (demand response)'
+            });
+            
+            showRecoveryTimeline('Heat wave duration: 5-7 days forecast');
+        }
+        
+        function simulateIceStorm() {
+            updateGridStatus('🧊 ICE STORM ALERT', 'Severe icing Northeast. 1,200+ lines de-energized. Tree-related outages cascading. Restoration crews deployed.', '#0ea5e9');
+            updateWeatherDisplay('icestorm');
+            
+            const nodes = document.querySelectorAll('.grid-node');
+            nodes[0].className = 'grid-node critical-node node-1'; // Northeast affected
+            nodes[7].className = 'grid-node critical-node node-8'; // Great Lakes region
+            
+            updateMetrics({
+                renewable: '89 GW (-69% weather impact)',
+                storage: '123 GWh (maximum discharge)',
+                savings: '$78.3M (rapid restoration)'
+            });
+            
+            showRecoveryTimeline('Ice melting: 24-36 hours + repairs');
+        }
+        
+        function updateGridStatus(title, description, color) {
+            const alertPanel = document.querySelector('.alert-panel');
+            alertPanel.style.borderColor = color;
+            alertPanel.style.background = `rgba(${color === '#dc2626' ? '220, 38, 38' : color === '#f59e0b' ? '245, 158, 11' : color === '#7c3aed' ? '124, 58, 237' : '14, 165, 233'}, 0.1)`;
+            
+            alertPanel.innerHTML = `
+                <div style="color: ${color}; font-weight: bold; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 0.5rem;">
+                    ${title}
+                </div>
+                <div style="font-weight: bold; margin-bottom: 0.5rem;">GridOS® Response Active</div>
+                <div style="font-size: 0.9rem; margin-bottom: 1rem;">
+                    ${description}
+                </div>
+                <div style="font-size: 0.8rem; color: #10b981;">
+                    🤖 AI Orchestration: Load balancing and resource allocation optimized
+                </div>
+            `;
+        }
+        
+        function updateWeatherDisplay(scenario) {
+            const weatherDisplay = document.getElementById('weather-display');
+            const weatherData = {
+                storm: '🌪️ Hurricane Cat 3 • 🌬️ 120 mph winds • ⛈️ Severe',
+                wildfire: '🔥 Red Flag Warning • 🌬️ 45 mph gusts • 🌡️ 105°F',
+                heatwave: '🌡️ Extreme Heat 115°F • ☀️ No wind • 🚨 Grid Alert',
+                icestorm: '🧊 Freezing Rain • ❄️ 0.5" ice buildup • 🌨️ Severe',
+                cyber: '🛡️ Secure Mode • 🔒 Manual Operation • 🚨 FBI Alerted',
+                outage: '⚡ Plant Offline • 🔧 Maintenance Mode • 📊 Reserves Active',
+                normal: '🌤️ Clear • 🌬️ 12 mph winds • ☀️ High solar'
+            };
+            
+            weatherDisplay.textContent = weatherData[scenario] || weatherData.normal;
+        }
+        
+        function updateMetrics(metrics) {
+            if (metrics.renewable) {
+                document.getElementById('solar-output').parentNode.innerHTML = `
+                    <div class="stat-value" style="color: #f59e0b;">${metrics.renewable.split(' ')[0]} ${metrics.renewable.split(' ')[1]}</div>
+                    <div>Total Generation</div>
+                    <div style="font-size: 0.8rem; color: #f59e0b;">${metrics.renewable.substring(6)}</div>
+                `;
+            }
+            
+            if (metrics.storage) {
+                document.getElementById('storage-level').parentNode.innerHTML = `
+                    <div class="stat-value" style="color: #3b82f6;">${metrics.storage.split(' ')[0]} ${metrics.storage.split(' ')[1]}</div>
+                    <div>Battery Storage</div>
+                    <div style="font-size: 0.8rem; color: #3b82f6;">${metrics.storage.substring(7)}</div>
+                `;
+            }
+            
+            if (metrics.savings) {
+                const costSavings = document.querySelector('.cost-savings .cost-value');
+                costSavings.textContent = metrics.savings.split(' ')[0];
+                costSavings.nextElementSibling.textContent = metrics.savings.substring(metrics.savings.indexOf(' ') + 1);
+            }
+        }
+        
+        function showRecoveryTimeline(timelineText) {
+            const timelineElement = document.querySelector('.predictive-timeline');
+            timelineElement.innerHTML = `
+                <h4>Recovery Timeline Prediction</h4>
+                <div class="timeline-bar" style="margin: 1rem 0;">
+                    <div class="timeline-progress" style="background: linear-gradient(90deg, #ef4444, #f59e0b, #10b981); width: 25%;"></div>
+                </div>
+                <div style="font-size: 0.9rem; color: #f59e0b;">${timelineText}</div>
+                <div style="font-size: 0.8rem; opacity: 0.8; margin-top: 0.5rem;">AI-powered recovery optimization active</div>
+            `;
+        }
+        
+        // Update grid metrics every 5 seconds
+        setInterval(updateGridMetrics, 5000);
+        
+        // Animate power lines
+        function animatePowerLines() {
+            const lines = document.querySelectorAll('.power-line');
+            lines.forEach(line => {
+                line.style.background = `linear-gradient(90deg, 
+                    transparent, #10b981, transparent, #3b82f6, transparent)`;
+            });
+        }
+        
+        setInterval(animatePowerLines, 3000);
+        
+        // Reset simulation to normal operations
+        function resetSimulation() {
+            // Reset all nodes to normal status
+            const nodes = document.querySelectorAll('.grid-node');
+            nodes[0].className = 'grid-node renewable-node node-1';
+            nodes[1].className = 'grid-node traditional-node node-2';
+            nodes[2].className = 'grid-node renewable-node node-3';
+            nodes[3].className = 'grid-node storage-node node-4';
+            nodes[4].className = 'grid-node renewable-node node-5';
+            nodes[5].className = 'grid-node renewable-node node-6';
+            nodes[6].className = 'grid-node critical-node node-7';
+            nodes[7].className = 'grid-node storage-node node-8';
+            
+            // Reset status panel
+            updateGridStatus('✅ NORMAL OPERATIONS', 'All systems operational. 68.3% renewable penetration maintained. Grid stability optimal.', '#10b981');
+            updateWeatherDisplay('normal');
+            
+            // Reset metrics
+            updateMetrics({
+                renewable: '287 GW (+12% from forecast)',
+                storage: '94 GWh (optimal level)',
+                savings: '$47.3M (daily optimization)'
+            });
+            
+            // Reset timeline
+            document.querySelector('.predictive-timeline').innerHTML = `
+                <h4>DERMS Integration Status</h4>
+                <div style="font-size: 0.9rem; margin: 1rem 0; opacity: 0.8;">
+                    Managing 847,000+ distributed energy resources
+                </div>
+                <div class="der-grid">
+                    <div class="der-item">
+                        <span>Rooftop Solar</span>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span>543 GW</span>
+                            <div class="der-status status-online"></div>
+                        </div>
+                    </div>
+                    <div class="der-item">
+                        <span>Home Batteries</span>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span>89 GWh</span>
+                            <div class="der-status status-online"></div>
+                        </div>
+                    </div>
+                    <div class="der-item">
+                        <span>EV Charging</span>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span>156 MW</span>
+                            <div class="der-status status-maintenance"></div>
+                        </div>
+                    </div>
+                    <div class="der-item">
+                        <span>Wind Farms</span>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span>234 GW</span>
+                            <div class="der-status status-online"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Initialize with realistic data
+        document.addEventListener('DOMContentLoaded', function() {
+            updateGridMetrics();
+            
+            // Add reset button to optimization panel
+            const optimizationPanel = document.querySelector('.optimization-panel');
+            const resetButton = document.createElement('button');
+            resetButton.textContent = '🔄 Reset to Normal Operations';
+            resetButton.className = 'control-btn';
+            resetButton.style.marginTop = '1rem';
+            resetButton.style.width = '100%';
+            resetButton.onclick = resetSimulation;
+            optimizationPanel.appendChild(resetButton);
+        });
+    </script>
+</body>
+</html>
